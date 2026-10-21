@@ -40,6 +40,8 @@ Ask only for choices not already known:
   locally when the operator does not want them in chat.
 - Local evaluation or access from TVs on the network? Existing HTTPS proxy?
 - Which units/categories should appear, and which interfaces are mandatory?
+- Schematic, country or world map? For geographic placement, follow [maps](maps.md)
+  and let the operator supply coordinates locally; do not infer locations from IPs.
 
 Read [setup](setup.md) and [coverage](integrations.md). If no monitoring system
 exists, explain that the demo works immediately but live mode needs an existing
@@ -71,7 +73,9 @@ blindly copy examples over a working installation.
 
 For a new installation, create `.env` from `.env.example`. Create
 `config/local.json` from `config/live.example.json` for LibreNMS, or
-`config/zabbix.example.json` for Zabbix. Set `NOCTV_CONFIG_FILE=./config/local.json`.
+`config/zabbix.example.json` for Zabbix. Prometheus and NetBox have their own
+`config/prometheus.example.json` and `config/netbox.example.json` examples.
+Set `NOCTV_CONFIG_FILE=./config/local.json`.
 Have the operator fill credentials in a local editor or secret store, without
 pasting values into chat or shell arguments. Live mode also requires `NOCTV_USER`
 and a unique `NOCTV_PASSWORD` of at least 16 characters.
@@ -79,6 +83,8 @@ and a unique `NOCTV_PASSWORD` of at least 16 characters.
 | Source | Local environment settings | Configuration work |
 | --- | --- | --- |
 | LibreNMS | `LIBRENMS_URL` ending in `/api/v0/`, `LIBRENMS_TOKEN` | Map actual location strings to site IDs; adjust category/root/required-port overrides |
+| Prometheus | `PROMETHEUS_URL`, optional token with `token_env` | Follow [Prometheus guide](prometheus.md); map explicit status/metric selectors and identity labels |
+| NetBox | `NETBOX_URL`, `NETBOX_TOKEN` (v2) | Follow [NetBox guide](netbox.md); map sites/categories; inventory alone has unknown operational state |
 | Zabbix | `ZABBIX_URL` ending in `api_jsonrpc.php`, `ZABBIX_TOKEN` | Read [Zabbix guide](zabbix.md); use the operator's host IDs and exact template item keys |
 
 Use dedicated read-only accounts. Zabbix requires access to the desired hosts

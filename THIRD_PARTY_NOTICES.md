@@ -11,6 +11,8 @@ NOCtv source code is MIT licensed. Dependencies and assets retain their own lice
 - **Gunicorn:** MIT; installed from PyPI by `requirements.txt`.
 - **packaging:** Apache-2.0 OR BSD-2-Clause; installed from PyPI.
 - **Playwright:** Apache-2.0; development/browser checks only.
+- **Country outlines:** Natural Earth, public domain. Pinned source and
+  reproduction steps are in [docs/maps.md](docs/maps.md).
 
 No manufacturer faceplates, private screenshots, device-export images or other
 operational media are distributed. Generic device/interface drawings are part

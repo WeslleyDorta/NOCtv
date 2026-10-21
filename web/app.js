@@ -26,13 +26,25 @@ function siteState(id){const all=data.devices.filter(d=>d.site===id);if(!all.len
 function cloud(st){return `<span class="site-symbol cloud" data-state="${st}"><svg viewBox="0 0 60 44" aria-hidden="true"><path d="M15 34C0 34 0 14 14 12C17-3 40-3 44 14C59 12 61 34 46 34Z"/><path d="M23 19h14v5H23zm0 8h14v5H23z"/></svg></span>`;}
 function edge(a,b,link,flow=false){const dx=b.x-a.x,dy=b.y-a.y;const path=`M${a.x} ${a.y} C${a.x+dx*.45} ${a.y} ${a.x+dx*.55} ${b.y} ${b.x} ${b.y}`;return `<path class="edge" data-state="${esc(link.state)}" d="${path}"/>${flow?`<path class="flow" data-state="${esc(link.state)}" d="${path}"/>`:''}`;}
 function connections(){
- const units=sites(),byId=new Map(data.devices.map(d=>[d.id,d])),positions=new Map(units.map(s=>[s.id,s]));
+ const units=sites(),geographic=config.map?.mode!=='schematic'&&config.map?.positions,byId=new Map(data.devices.map(d=>[d.id,d])),positions=new Map(units.filter(s=>!geographic||geographic[s.id]).map(s=>[s.id,geographic?{x:50,y:50}:s]));
  const links=data.links.filter(l=>byId.get(l.a)?.site!==byId.get(l.b)?.site && positions.has(byId.get(l.a)?.site)&&positions.has(byId.get(l.b)?.site));
  const paths=links.map(l=>edge(positions.get(byId.get(l.a).site),positions.get(byId.get(l.b).site),l,numeric(l.traffic_bps)&&l.traffic_bps>0)).join('');
- const nodeHTML=units.map(s=>{const st=siteState(s.id);return `<button class="graph-node" data-action="site" data-id="${esc(s.id)}" style="left:${s.x}%;top:${s.y}%" data-state="${st}">${s.kind==='cloud'?cloud(st):`<span class="site-symbol">${s.kind==='headquarters'?'HQ':'⌁'}</span>`}<h3>${esc(s.name)}</h3><small>${esc(s.city||'')}</small></button>`;}).join('');
+ const nodeHTML=units.filter(s=>positions.has(s.id)).map(s=>{const st=siteState(s.id),p=positions.get(s.id);return `<button class="graph-node" data-action="site" data-id="${esc(s.id)}" style="left:${p.x}%;top:${p.y}%" data-state="${st}">${s.kind==='cloud'?cloud(st):`<span class="site-symbol">${s.kind==='headquarters'?'HQ':'⌁'}</span>`}<h3>${esc(s.name)}</h3><small>${esc(s.city||'')}</small></button>`;}).join('');
  const cards=units.filter(s=>!siteFilter||s.id===siteFilter).slice(0,6).map(s=>{const ds=data.devices.filter(d=>d.site===s.id);return `<button class="site-card" data-action="site" data-id="${esc(s.id)}" data-state="${siteState(s.id)}"><span class="site-head"><h3>${esc(s.name)}</h3>${state(siteState(s.id))}</span><p>${esc(s.city||s.kind||'Site')}</p><span class="site-counts"><span><strong>${ds.length}</strong> devices</span><span class="good"><strong>${ds.filter(d=>d.state==='up').length}</strong> up</span>${ds.some(d=>d.state==='down')?`<span class="bad"><strong>${ds.filter(d=>d.state==='down').length}</strong> down</span>`:''}</span></button>`;}).join('');
  const strip=links.slice(0,6).map(l=>`<div class="link-summary"><div>${esc(siteName(byId.get(l.a).site))} ↔ ${esc(siteName(byId.get(l.b).site))}<small>${esc(l.evidence)} · ${num(l.latency_ms,' ms')} · ${rate(l.traffic_bps)}</small></div>${state(l.state)}</div>`).join('');
- return `<div class="connections"><div class="site-list">${cards||'<p class="empty">No sites configured.</p>'}</div><section class="map-panel"><div class="panel-head"><h2>Network between sites</h2><small>Schematic locations · ${links.length} reported links</small></div><div class="graph"><svg class="edges" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${paths}</svg>${nodeHTML}</div><div class="link-strip">${strip||'<p class="note">No inter-site links reported. Site placement does not imply a connection.</p>'}</div></section></div>`;
+ return `<div class="connections"><div class="site-list">${cards||'<p class="empty">No sites configured.</p>'}</div><section class="map-panel"><div class="panel-head"><h2>Network between sites</h2><small>${geographic?esc(config.map.label):'Schematic locations'} · ${links.length} reported links</small></div><div class="graph${geographic?' geographic':''}">${geographic?'<svg class="country-layer" aria-hidden="true"></svg>':''}<svg class="edges" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">${paths}</svg>${nodeHTML}</div>${geographic?`<p class="map-caption">Natural Earth · ${units.length-positions.size} sites outside this map or without coordinates</p>`:''}<div class="link-strip">${strip||'<p class="note">No inter-site links reported. Site placement does not imply a connection.</p>'}</div></section></div>`;
+}
+function layoutGeography(){
+ const graph=$('.geographic');if(!graph)return;
+ const map=config.map,[west,north,east,south]=map.bounds,w=graph.clientWidth,h=graph.clientHeight;
+ const scale=Math.min(Math.max(1,w-130)/Math.max(.001,east-west),Math.max(1,h-110)/Math.max(.001,south-north));
+ const tx=(w-(east-west)*scale)/2-west*scale,ty=(h-(south-north)*scale)/2-north*scale-15;
+ const layer=graph.querySelector('.country-layer');layer.setAttribute('viewBox',`0 0 ${w} ${h}`);
+ layer.innerHTML=`<g transform="translate(${tx} ${ty}) scale(${scale})">${map.outlines.map(o=>`<path data-country="${esc(o.id)}" d="${esc(o.path)}"/>`).join('')}</g>`;
+ const points=new Map(Object.entries(map.positions).map(([id,p])=>[id,{x:(p.x*scale+tx)/w*100,y:(p.y*scale+ty)/h*100}]));
+ for(const node of graph.querySelectorAll('[data-action="site"]')){const p=points.get(node.dataset.id);node.style.left=p.x+'%';node.style.top=p.y+'%';}
+ const byId=new Map(data.devices.map(d=>[d.id,d]));
+ graph.querySelector('.edges').innerHTML=data.links.filter(l=>byId.get(l.a)?.site!==byId.get(l.b)?.site&&points.has(byId.get(l.a)?.site)&&points.has(byId.get(l.b)?.site)).map(l=>edge(points.get(byId.get(l.a).site),points.get(byId.get(l.b).site),l,numeric(l.traffic_bps)&&l.traffic_bps>0)).join('');
 }
 function switchGraph(){
  const ds=selected().filter(d=>d.type==='switch').sort((a,b)=>Number(b.root)-Number(a.root)||a.name.localeCompare(b.name)),limit=config.display.max_cards;
@@ -64,6 +76,7 @@ function render(){
  $('#stats').innerHTML=stats.map(([v,label,hint,cls])=>`<div class="stat"><strong class="${cls}">${v}</strong><span>${label}</span><small>${hint}</small></div>`).join('');
  $('#coverage').textContent=`${sites().length} sites · only reported links are drawn · ${config.mode==='demo'?'all data is simulated':'live sources'}`;
  $('#stage').innerHTML=view==='connections'?connections():view==='switches'?switchGraph():view==='ports'?portTable():devicesGrid();
+ layoutGeography();
  $('#sources').textContent=data.sources.map(s=>`${s.id}: ${s.state} · ${age(s.last_success)} · interval ${s.interval_seconds}s`).join('  |  ');
  const critical=data.alerts.filter(a=>a.severity==='critical').length;$('.ticker').dataset.critical=String(critical>0);$('#alert-summary').textContent=critical?`${critical} critical`:`${data.alerts.length} alerts`;
  const ticker=(data.alerts.length?data.alerts:[{severity:'ok',text:config.mode==='demo'?'Demo data · Configure your sources to monitor your own environment':'No active alerts reported'}]).map(a=>`<span data-severity="${esc(a.severity)}">${esc(a.text)}</span>`).join('');

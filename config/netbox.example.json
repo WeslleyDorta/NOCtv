@@ -1,0 +1,34 @@
+{
+  "title": "NetBox inventory",
+  "mode": "live",
+  "timezone": "UTC",
+  "sites": [
+    {
+      "id": "hq",
+      "name": "Headquarters",
+      "kind": "headquarters",
+      "x": 50,
+      "y": 50
+    }
+  ],
+  "connectors": [
+    {
+      "id": "netbox",
+      "type": "netbox",
+      "url_env": "NETBOX_URL",
+      "token_env": "NETBOX_TOKEN",
+      "interval_seconds": 300,
+      "max_age_seconds": 900,
+      "site_map": {
+        "corporate-hq": "hq"
+      },
+      "devices": {
+        "1": {
+          "type": "switch",
+          "site": "hq",
+          "web_url": "https://switch.example.com"
+        }
+      }
+    }
+  ]
+}

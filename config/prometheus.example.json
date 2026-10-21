@@ -1,0 +1,24 @@
+{
+  "mode": "live",
+  "title": "NOCtv",
+  "timezone": "UTC",
+  "sites": [{"id": "lab", "name": "Example site", "x": 50, "y": 50}],
+  "connectors": [{
+    "id": "prometheus",
+    "type": "prometheus",
+    "url_env": "PROMETHEUS_URL",
+    "interval_seconds": 60,
+    "max_age_seconds": 180,
+    "max_series": 1000,
+    "identity_label": "instance",
+    "status_query": "probe_success{job=\"blackbox\"}",
+    "metric_queries": {
+      "latency_ms": {"query": "probe_duration_seconds{job=\"blackbox\"}", "scale": 1000}
+    },
+    "site_label": "site",
+    "site_map": {"Example location": "lab"},
+    "devices": {
+      "192.0.2.10": {"name": "Example probe target", "type": "device", "site": "lab"}
+    }
+  }]
+}

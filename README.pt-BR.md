@@ -1,7 +1,7 @@
 # NOCtv
 
 Painel de monitoramento de rede para TVs e operações de NOC. Reúne dados do
-LibreNMS, Zabbix e APIs de firewalls em telas de conexões, switches, portas,
+LibreNMS, Zabbix, Prometheus, NetBox e APIs de firewalls em telas de conexões, switches, portas,
 servidores, impressoras, Wi-Fi e dispositivos.
 
 [English](README.md) · [Instalação](docs/setup.md) · [Integrações](docs/integrations.md)
@@ -37,6 +37,10 @@ O NOCtv funciona depois sem agente, assinatura ou chave de IA.
 
 ## Adaptar
 
+O [mapa pode ser esquemático, de um país ou mundial](docs/maps.md). São 240
+entradas de países e territórios incluídas no projeto, sem chave de API de mapas.
+No modo geográfico, configure o país e a latitude/longitude de cada unidade.
+
 1. Copie `.env.example` para `.env`.
 2. Copie `config/live.example.json` para `config/local.json`.
 3. Configure unidades, posições no mapa e fontes de dados.
@@ -59,6 +63,11 @@ inventário e gerenciamento; isso não comprova o estado das VPNs ou do tráfego
 O diagrama de portas é genérico. Os nomes dos vizinhos aparecem quando há evidência
 de descoberta; nomes de interfaces não são tratados como prova da conexão.
 Portas DOWN só geram alerta crítico quando marcadas como obrigatórias.
+
+Prometheus amplia a integração com sondas e exporters, incluindo dados do Uptime
+Kuma quando ele já é coletado pelo Prometheus. NetBox fornece inventário; o estado
+operacional fica desconhecido sem uma fonte de monitoramento. Consulte os
+[conectores e seus limites](docs/integrations.md).
 
 São reconhecidas 25 marcas, com 13 logos redistribuíveis incluídas. Nos demais
 casos, o sistema usa um ícone genérico. Identificação não equivale a certificação

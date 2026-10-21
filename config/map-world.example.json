@@ -1,0 +1,53 @@
+{
+  "title": "NOCtv",
+  "mode": "demo",
+  "timezone": "UTC",
+  "display": {
+    "refresh_seconds": 5,
+    "rotate_seconds": 25,
+    "connections_seconds": 45,
+    "max_cards": 16
+  },
+  "sites": [
+    {
+      "id": "hq",
+      "name": "Headquarters",
+      "city": "New York",
+      "kind": "headquarters",
+      "latitude": 40.71,
+      "longitude": -74.01,
+      "country": "US"
+    },
+    {
+      "id": "north",
+      "name": "North office",
+      "city": "London",
+      "kind": "branch",
+      "latitude": 51.51,
+      "longitude": -0.13,
+      "country": "GB"
+    },
+    {
+      "id": "east",
+      "name": "East office",
+      "city": "Tokyo",
+      "kind": "branch",
+      "latitude": 35.68,
+      "longitude": 139.69,
+      "country": "JP"
+    },
+    {
+      "id": "cloud",
+      "name": "Cloud DC",
+      "city": "Cape Town",
+      "kind": "cloud",
+      "latitude": -33.92,
+      "longitude": 18.42,
+      "country": "ZA"
+    }
+  ],
+  "connectors": [],
+  "map": {
+    "mode": "world"
+  }
+}

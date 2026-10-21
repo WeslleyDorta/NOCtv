@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Read-only Prometheus probe/metric and NetBox inventory adapters, fixture tests,
+  examples and integration research; Uptime Kuma supported indirectly through
+  its documented Prometheus export.
+
+- Offline country/world maps with 240 country/territory entries, shared geographic
+  projection, explicit coordinates and backward-compatible schematic layouts.
+
 - Shared `AGENTS.md` instructions, a `CLAUDE.md` import and an agent-guided
   installation runbook for demo/live setup, source checks and recovery.
 

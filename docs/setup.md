@@ -61,7 +61,8 @@ collection duration and warnings. The UI also exposes these timestamps.
 
 ## Sites and equipment
 
-Site IDs are stable local identifiers. `x` and `y` are schematic percentages from
+For [country/world maps](maps.md), configure latitude/longitude and country codes.
+Site IDs are stable local identifiers. In schematic mode, `x` and `y` are percentages from
 10 to 90, **not geographic coordinates**. Set `kind` to `headquarters`, `branch`
 or `cloud`; cloud sites have a distinct symbol. Only reported links are drawn.
 Unmapped devices are visible under Unassigned. The initial TV composition works
@@ -115,7 +116,8 @@ trusted bundle read-only with a Compose override and set the connector's
 
 ## Other sources
 
-[Zabbix](zabbix.md) and [firewall management APIs](firewalls.md) have separate
+[Zabbix](zabbix.md), [Prometheus](prometheus.md), [NetBox](netbox.md) and
+[firewall management APIs](firewalls.md) have separate
 examples. `config/zabbix.example.json` and `config/firewalls.example.json` are full
 configuration files; the Forcepoint example is a single connector object. Keep
 only sources you use and give each a unique ID. The Compose service loads custom

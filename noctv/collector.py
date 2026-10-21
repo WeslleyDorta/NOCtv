@@ -8,9 +8,11 @@ from .connectors.demo import Demo
 from .connectors.librenms import LibreNMS
 from .connectors.forcepoint import Forcepoint
 from .connectors.zabbix import Zabbix
+from .connectors.prometheus import Prometheus
+from .connectors.netbox import NetBox
 from .connectors.firewalls import FortiGate, PANOS, CheckPoint, SophosCentral
 
-ADAPTERS = {'librenms': LibreNMS, 'forcepoint': Forcepoint, 'zabbix': Zabbix, 'fortigate': FortiGate, 'panos': PANOS, 'checkpoint': CheckPoint, 'sophos_central': SophosCentral}
+ADAPTERS = {'librenms': LibreNMS, 'forcepoint': Forcepoint, 'zabbix': Zabbix, 'fortigate': FortiGate, 'panos': PANOS, 'checkpoint': CheckPoint, 'sophos_central': SophosCentral, 'prometheus': Prometheus, 'netbox': NetBox}
 
 
 class Collector:

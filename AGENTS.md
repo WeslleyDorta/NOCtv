@@ -42,6 +42,7 @@ does not need an AI account or key.
 | Understand actual connector coverage | [docs/integrations.md](docs/integrations.md) |
 | Zabbix items, ports and permissions | [docs/zabbix.md](docs/zabbix.md) |
 | Direct firewall APIs | [docs/firewalls.md](docs/firewalls.md) |
+| Country/world maps and coordinates | [docs/maps.md](docs/maps.md) |
 | Add an adapter | [docs/connector-contract.md](docs/connector-contract.md) |
 | Brands and asset provenance | [docs/brands.md](docs/brands.md) |
 | Change application code | [CONTRIBUTING.md](CONTRIBUTING.md) |

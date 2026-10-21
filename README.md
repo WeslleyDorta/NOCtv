@@ -53,7 +53,8 @@ access to the installation machine; NOCtv itself requires no AI service or key.
 ## What is included
 
 - Connections, switches, ports, servers, printers, Wi-Fi and device views.
-- Configurable sites and schematic map positions; connections come from data.
+- Configurable sites with schematic, country or world maps; connections come from data.
+  [240 country/territory entries](docs/maps.md) are bundled; no map API key is needed.
 - Click a switch, select an interface, inspect its state and discovered neighbor.
 - Per-source freshness, unknown states and required-interface alert policies.
 - Top navigation, automatic TV rotation, longer connections dwell, reduced motion
@@ -70,6 +71,8 @@ access to the installation machine; NOCtv itself requires no AI service or key.
 | --- | --- |
 | LibreNMS API v0 | Devices, availability, latency/uptime, interfaces, rates and LLDP/CDP links |
 | Zabbix 7.0 API | Hosts, ICMP status, selected metrics and explicitly mapped interfaces |
+| Prometheus API v1 | Explicit probe/status selectors and mapped gauge metrics; supports metrics already scraped from Uptime Kuma |
+| NetBox 4.5+ | Device/site inventory with v2 tokens; no inferred operational availability |
 | Forcepoint SMC 7.2 | Firewall/interface state, reported services and managed VPN metrics |
 | FortiGate / PAN-OS | Device inventory and direct management API reachability |
 | Check Point / Sophos Central | Managed firewall inventory; management connection status where explicitly supplied |
@@ -89,7 +92,9 @@ adapters do not claim VPN or dataplane health. See [the full matrix](docs/integr
    validate with `python3 -m noctv check --config config/local.json`, then restart.
 
 Detailed examples: [LibreNMS and Forcepoint](docs/setup.md), [Zabbix](docs/zabbix.md),
-[firewall APIs](docs/firewalls.md), [brand recognition](docs/brands.md).
+[firewall APIs](docs/firewalls.md), [Prometheus](docs/prometheus.md),
+[NetBox](docs/netbox.md), [brand recognition](docs/brands.md).
+Read the [integration research](docs/integration-research.md) for scope and trade-offs.
 
 ## Contribute
 

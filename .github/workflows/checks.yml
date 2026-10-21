@@ -19,6 +19,10 @@ jobs:
       - run: python -m noctv check --config config/live.example.json
       - run: python -m noctv check --config config/zabbix.example.json
       - run: python -m noctv check --config config/firewalls.example.json
+      - run: python -m noctv check --config config/map-country.example.json
+      - run: python -m noctv check --config config/map-world.example.json
+      - run: python -m noctv check --config config/prometheus.example.json
+      - run: python -m noctv check --config config/netbox.example.json
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm test

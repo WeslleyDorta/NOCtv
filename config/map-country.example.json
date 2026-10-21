@@ -1,0 +1,54 @@
+{
+  "title": "NOCtv",
+  "mode": "demo",
+  "timezone": "UTC",
+  "display": {
+    "refresh_seconds": 5,
+    "rotate_seconds": 25,
+    "connections_seconds": 45,
+    "max_cards": 16
+  },
+  "sites": [
+    {
+      "id": "hq",
+      "name": "Headquarters",
+      "city": "São Paulo",
+      "kind": "headquarters",
+      "latitude": -23.55,
+      "longitude": -46.63,
+      "country": "BR"
+    },
+    {
+      "id": "north",
+      "name": "North office",
+      "city": "Brasília",
+      "kind": "branch",
+      "latitude": -15.79,
+      "longitude": -47.88,
+      "country": "BR"
+    },
+    {
+      "id": "east",
+      "name": "East office",
+      "city": "Recife",
+      "kind": "branch",
+      "latitude": -8.05,
+      "longitude": -34.88,
+      "country": "BR"
+    },
+    {
+      "id": "cloud",
+      "name": "Cloud DC",
+      "city": "Porto Alegre",
+      "kind": "cloud",
+      "latitude": -30.03,
+      "longitude": -51.23,
+      "country": "BR"
+    }
+  ],
+  "connectors": [],
+  "map": {
+    "mode": "country",
+    "country": "BR"
+  }
+}

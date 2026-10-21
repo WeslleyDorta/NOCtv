@@ -8,6 +8,8 @@ MIB, replace a poller or certify every device with a recognized logo.
 | Demo | Synthetic deterministic source | Yes | Simulated | Simulated | Simulated | Sample CPU, memory, toner, clients |
 | LibreNMS | API v0 | Yes, dynamic | Upstream device status | State, speed, RX/TX | LLDP/CDP records | Latency and uptime |
 | Zabbix | API 7.0 | Yes, dynamic | Fresh ICMP item only | Explicit item mappings | Not implemented | Exact/default and configured metric keys |
+| Prometheus | HTTP API v1 | Dynamic selector identities | Explicit binary probe/status metric | Not implemented | Not implemented | Configured gauge metrics, original sample timestamps |
+| NetBox | REST API 4.5+, v2 token | Dynamic devices | Not established | Not implemented | Not implemented | Manufacturer, model, primary IP, site mapping |
 | Forcepoint | SMC 7.2 | Engine inventory | Explicit SMC status | Reported state | Managed VPN peers | VPN latency/loss/traffic, services |
 | FortiGate | REST monitor v2 / FortiOS 7.x | Single appliance | Management only | Not implemented | Not implemented | Model, identity |
 | PAN-OS | XML API / PAN-OS 11.x | Single appliance | Management only | Not implemented | Not implemented | Model, identity |
@@ -17,6 +19,10 @@ MIB, replace a poller or certify every device with a recognized logo.
 All live connectors in the community release are **synthetic-fixture tested**.
 No production credentials or private inventory were used to validate this package.
 Firmware-specific payloads and permissions require a controlled installation test.
+
+[Prometheus](prometheus.md) and [NetBox](netbox.md) have separate setup examples.
+Uptime Kuma can feed Prometheus using its documented metrics export; this is not
+a direct Kuma connector. See [integration research and choices](integration-research.md).
 
 ## Wi-Fi, printers and other brands
 
