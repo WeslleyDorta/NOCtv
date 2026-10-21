@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="NOCtv: a self-hosted network operations display with topology, ports and monitoring connectors.">
+  <title>NOCtv</title><link rel="icon" href="/icon.svg" type="image/svg+xml"><link rel="stylesheet" href="/app.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to monitoring</a>
+  <header class="topbar"><a class="brand" href="#connections"><img src="/icon.svg" alt="" width="30" height="30">NOC<span>tv</span></a><nav aria-label="Monitoring views" id="nav"></nav><span id="mode" class="badge">Connecting</span></header>
+  <main id="main" tabindex="-1">
+    <section class="heading"><div><h1 id="title">Connections</h1><p id="subtitle">A shared view of your network</p></div><div class="controls"><span id="freshness" role="status">Connecting…</span><label class="sr" for="site-filter">Filter by site</label><select id="site-filter"><option value="">All sites</option></select><button id="motion" aria-pressed="true">Motion on</button><button id="rotate" aria-pressed="false">Start TV loop</button><button id="fullscreen" aria-label="Toggle fullscreen">⛶</button></div></section>
+    <div id="error" role="alert" hidden></div>
+    <section id="stats" class="stats" aria-label="Current network summary"></section>
+    <section id="stage" aria-label="Monitoring content"></section>
+    <div class="stage-footer"><span id="coverage"></span><span id="sources"></span></div>
+  </main>
+  <footer class="ticker" aria-label="Current alerts"><button id="alert-summary" data-action="alerts">No alerts</button><div class="ticker-window"><div id="ticker-track"></div></div><button id="ticker-pause" aria-label="Pause alert scrolling" aria-pressed="false">Ⅱ</button></footer>
+  <dialog id="details" aria-labelledby="dialog-title"><div class="dialog-heading"><div><p id="dialog-eyebrow"></p><h2 id="dialog-title"></h2></div><button id="close-dialog">Close ×</button></div><div id="dialog-body"></div></dialog>
+  <script src="/app.js" defer></script>
+</body>
+</html>

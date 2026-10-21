@@ -1,0 +1,20 @@
+{
+  "title": "My NOC",
+  "mode": "live",
+  "timezone": "UTC",
+  "display": {"refresh_seconds": 5, "rotate_seconds": 25, "connections_seconds": 45, "max_cards": 16},
+  "sites": [
+    {"id": "hq", "name": "Headquarters", "city": "Your city", "kind": "headquarters", "x": 25, "y": 50},
+    {"id": "branch", "name": "Branch", "city": "Another city", "kind": "branch", "x": 75, "y": 50}
+  ],
+  "connectors": [
+    {
+      "id": "librenms", "type": "librenms",
+      "url_env": "LIBRENMS_URL", "token_env": "LIBRENMS_TOKEN",
+      "interval_seconds": 60, "max_age_seconds": 600,
+      "discovery_max_age_seconds": 25200, "upstream_timezone": "UTC",
+      "site_map": {"Main office": "hq", "Remote office": "branch"},
+      "devices": {"1": {"type": "switch", "site": "hq", "root": true, "required_ports": ["Gi1"], "web_url": "https://switch.example.com"}}
+    }
+  ]
+}

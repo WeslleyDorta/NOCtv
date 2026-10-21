@@ -1,0 +1,13 @@
+{
+  "title": "NOCtv",
+  "mode": "demo",
+  "timezone": "UTC",
+  "display": {"refresh_seconds": 5, "rotate_seconds": 25, "connections_seconds": 45, "max_cards": 16},
+  "sites": [
+    {"id": "hq", "name": "Headquarters", "city": "Demo campus", "kind": "headquarters", "x": 28, "y": 54},
+    {"id": "north", "name": "North office", "city": "Demo branch", "kind": "branch", "x": 62, "y": 22},
+    {"id": "east", "name": "East office", "city": "Demo branch", "kind": "branch", "x": 78, "y": 62},
+    {"id": "cloud", "name": "Cloud DC", "city": "Demo region", "kind": "cloud", "x": 53, "y": 82}
+  ],
+  "connectors": []
+}

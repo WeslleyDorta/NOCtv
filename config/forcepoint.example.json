@@ -1,0 +1,7 @@
+{
+  "id": "smc", "type": "forcepoint",
+  "url_env": "FORCEPOINT_URL", "token_env": "FORCEPOINT_KEY", "domain_env": "FORCEPOINT_DOMAIN",
+  "interval_seconds": 60, "max_age_seconds": 180,
+  "include_names": ["HQ Firewall", "Branch Firewall"],
+  "site_map": {"HQ Firewall": "hq", "Branch Firewall": "branch"}
+}

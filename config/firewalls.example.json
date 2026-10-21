@@ -1,0 +1,35 @@
+{
+  "title": "Firewall management inventory",
+  "mode": "live",
+  "timezone": "UTC",
+  "sites": [
+    {"id": "hq", "name": "Headquarters", "kind": "headquarters", "x": 30, "y": 50},
+    {"id": "branch", "name": "Branch", "kind": "branch", "x": 70, "y": 50}
+  ],
+  "connectors": [
+    {
+      "id": "fortigate-hq", "type": "fortigate",
+      "url_env": "FORTIGATE_URL", "token_env": "FORTIGATE_TOKEN",
+      "interval_seconds": 60, "max_age_seconds": 600,
+      "devices": {"REPLACE_WITH_FORTIGATE_SERIAL": {"site": "hq", "name": "Headquarters firewall", "root": true}}
+    },
+    {
+      "id": "panos-branch", "type": "panos",
+      "url_env": "PANOS_URL", "token_env": "PANOS_API_KEY",
+      "interval_seconds": 60, "max_age_seconds": 600,
+      "site_map": {"REPLACE_WITH_PANOS_SERIAL": "branch"}
+    },
+    {
+      "id": "checkpoint-management", "type": "checkpoint",
+      "url_env": "CHECKPOINT_URL", "username_env": "CHECKPOINT_USERNAME", "password_env": "CHECKPOINT_PASSWORD",
+      "interval_seconds": 120, "max_age_seconds": 600,
+      "site_map": {"REPLACE_WITH_GATEWAY_UID": "hq"}
+    },
+    {
+      "id": "sophos-central", "type": "sophos_central",
+      "url_env": "SOPHOS_URL", "client_id_env": "SOPHOS_CLIENT_ID", "client_secret_env": "SOPHOS_CLIENT_SECRET", "tenant_id_env": "SOPHOS_TENANT_ID",
+      "interval_seconds": 120, "max_age_seconds": 600,
+      "site_map": {"REPLACE_WITH_SOPHOS_FIREWALL_ID": "branch"}
+    }
+  ]
+}

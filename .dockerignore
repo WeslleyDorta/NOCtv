@@ -1,0 +1,10 @@
+*
+!requirements.txt
+!noctv/
+!noctv/**
+!web/
+!web/**
+!config/
+!config/demo.json
+**/__pycache__
+**/*.pyc

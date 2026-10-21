@@ -1,0 +1,40 @@
+name: Checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: python -m unittest discover -s tests -v
+      - run: python -m noctv check
+      - run: python -m noctv check --config config/live.example.json
+      - run: python -m noctv check --config config/zabbix.example.json
+      - run: python -m noctv check --config config/firewalls.example.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npm test
+      - run: docker compose config --quiet
+      - run: docker build -t noctv-test .
+      - name: Container smoke check
+        run: |
+          docker run -d --name noctv-test --read-only --tmpfs /tmp:rw,noexec,nosuid,size=32m --cap-drop ALL --security-opt no-new-privileges -p 127.0.0.1:8080:8080 noctv-test
+          for i in $(seq 1 30); do
+            if curl --fail http://localhost:8080/api/v1/snapshot > /tmp/snapshot.json && python -c "import json; d=json.load(open('/tmp/snapshot.json')); assert d['mode']=='demo' and len(d['devices']) == 16"; then break; fi
+            sleep 1
+          done
+          curl --fail http://localhost:8080/api/v1/snapshot > /tmp/snapshot.json
+          python -c "import json; d=json.load(open('/tmp/snapshot.json')); assert d['mode']=='demo' and len(d['devices']) == 16"
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-captures
+          path: artifacts/

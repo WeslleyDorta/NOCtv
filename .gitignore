@@ -1,0 +1,15 @@
+.env
+.env.*
+!.env.example
+config/local*.json
+config/runtime*.json
+secrets/
+*.pem
+*.key
+*.log
+.venv/
+__pycache__/
+*.pyc
+node_modules/
+artifacts/
+.DS_Store

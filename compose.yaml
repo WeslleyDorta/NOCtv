@@ -1,0 +1,30 @@
+services:
+  noctv:
+    build: .
+    ports:
+      - "${NOCTV_BIND:-127.0.0.1}:${NOCTV_PORT:-8080}:8080"
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      NOCTV_CONFIG: /app/config/runtime.json
+      NOCTV_USER: ${NOCTV_USER:-}
+      NOCTV_PASSWORD: ${NOCTV_PASSWORD:-}
+      LIBRENMS_URL: ${LIBRENMS_URL:-}
+      LIBRENMS_TOKEN: ${LIBRENMS_TOKEN:-}
+      FORCEPOINT_URL: ${FORCEPOINT_URL:-}
+      FORCEPOINT_KEY: ${FORCEPOINT_KEY:-}
+      FORCEPOINT_DOMAIN: ${FORCEPOINT_DOMAIN:-}
+    volumes:
+      - ${NOCTV_CONFIG_FILE:-./config/demo.json}:/app/config/runtime.json:ro
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=32m
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8080/healthz', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3

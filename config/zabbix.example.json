@@ -1,0 +1,29 @@
+{
+  "mode": "live",
+  "title": "NOCtv",
+  "timezone": "UTC",
+  "sites": [
+    {"id": "lab", "name": "Example site", "x": 50, "y": 50}
+  ],
+  "connectors": [
+    {
+      "id": "zabbix",
+      "type": "zabbix",
+      "url_env": "ZABBIX_URL",
+      "token_env": "ZABBIX_TOKEN",
+      "interval_seconds": 60,
+      "max_age_seconds": 600,
+      "site_map": {"Example location": "lab"},
+      "devices": {
+        "12345": {
+          "type": "server",
+          "site": "lab",
+          "item_map": {"cpu_percent": "example.cpu.used.percent"},
+          "ports": [
+            {"id": "uplink", "name": "Uplink", "state_key": "example.interface.status", "up_value": "1", "down_value": "2", "required": true}
+          ]
+        }
+      }
+    }
+  ]
+}
