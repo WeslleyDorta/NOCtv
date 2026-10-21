@@ -63,6 +63,19 @@ def base_map(mode, code, crop):
     return {'bounds': [west * factor, -north, east * factor, -south], 'outlines': outlines}, (west, south, east, north, factor, wrap)
 
 
+@lru_cache(maxsize=1)
+def brazil_regions():
+    return json.loads((Path(__file__).parent / 'data/brazil-regions.json').read_text())
+
+
+def contains(ring, lon, lat):
+    inside = False
+    for (x, y), (px, py) in zip(ring, ring[-1:] + ring[:-1]):
+        if (y > lat) != (py > lat) and lon < (px - x) * (lat - y) / (py - y) + x:
+            inside = not inside
+    return inside
+
+
 def public_map(config):
     setting = config['map']
     mode = setting['mode']
@@ -79,4 +92,11 @@ def public_map(config):
         lon = west + (lon - west) % 360 if wrap else lon
         if west <= lon <= east and south <= lat <= north:
             positions[site['id']] = {'x': lon * factor, 'y': -lat}
-    return {**base, 'mode': mode, 'country': code, 'label': countries()[code]['name'] if code else 'World', 'positions': positions}
+    regions = []
+    if code == 'BR':
+        visible = [s for s in config['sites'] if s['id'] in positions]
+        for region in brazil_regions():
+            path = ''.join('M' + 'L'.join(f'{lon * factor:.3f},{-lat:.3f}' for lon, lat in ring) + 'Z' for ring in region['rings'])
+            active = any(contains(ring, s['longitude'], s['latitude']) for s in visible for ring in region['rings'])
+            regions.append({'id': region['id'], 'path': path, 'region': True, 'active': active})
+    return {**base, 'regions': regions, 'mode': mode, 'country': code, 'label': countries()[code]['name'] if code else 'World', 'positions': positions}

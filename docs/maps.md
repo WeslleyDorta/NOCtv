@@ -75,8 +75,9 @@ This focuses on the contiguous US, excluding Alaska/Hawaii. Explicit bounds
 must have west < east and south < north; they cannot cross the antimeridian.
 Sites outside the extent are not plotted. This is not a street map.
 
-There is no zoom/pan, state/province layer, automatic label collision avoidance
-or geocoding. Nearby site labels may overlap; use a narrower scope or schematic
+Brazil includes all 27 federative units; units containing configured sites are
+highlighted automatically. Other countries currently show national boundaries.
+There is no zoom/pan, automatic label collision avoidance or geocoding. Nearby site labels may overlap; use a narrower scope or schematic
 layout for local networks. World links use curved paths, not geodesic routes or
 dateline wrapping. Boundaries are generalized monitoring context.
 
@@ -105,3 +106,17 @@ The upstream SHA-256 is
 Maintainers can reproduce `noctv/data/countries.json` with
 `python3 tools/update_maps.py`. It downloads the pinned source and verifies the
 hash before writing. Startup never runs this maintenance download.
+
+### Brazil federative units
+
+The bundled `noctv/data/brazil-regions.json` contains simplified geometry from
+[IBGE Malhas API v3](https://servicodados.ibge.gov.br/api/docs/malhas?versao=3),
+obtained on 2026-10-19. It contains only numeric rings and official UF codes.
+The simplified SVG coordinates were inverted using longitude `(x-20)/14-74`
+and latitude `6-(y-20)/14`, then rounded to five decimals. Site names, colors,
+labels and network data are not embedded in this asset. The shared geographic
+projection places both regions and site markers; point-in-polygon tests decide
+which regions to highlight. The original country outline remains Natural Earth.
+
+Bundled geometry SHA-256: `6f2e16c24a77e393bd7eae4f992c5914e34cef2ef015a9e15a5966e31ed041c8`.
+The mesh is for monitoring context, not surveying or precise boundary analysis.

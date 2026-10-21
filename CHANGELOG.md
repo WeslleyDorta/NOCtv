@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Restore the compact NOC display: three-column connections, large geographic map,
+  branch topology, two port panels, host resources, printer supplies, Wi-Fi readings
+  and grouped device cards. Keep seven views and the shared navigation/ticker.
+- Bundle Brazil state boundaries and highlight only regions containing configured sites.
+- Show per-view summaries and collected session history; preserve unknown values.
+- Expand the offline synthetic scenario to 30 devices, including a required-port incident.
+- Restore unit details with compact inventory, firewall interfaces/services and VPN readings.
+- Remove stale server hardware/storage readings after source or browser connection failures.
+- Verify port state changes in both the switch miniature and open detail dialog.
+
 - Read-only Prometheus probe/metric and NetBox inventory adapters, fixture tests,
   examples and integration research; Uptime Kuma supported indirectly through
   its documented Prometheus export.

@@ -63,6 +63,10 @@ def validate(batch):
         ids.add(device['id'])
         if device.get('type') not in {'switch', 'firewall', 'router', 'server', 'printer', 'wireless', 'device'}:
             raise ValueError('invalid device type')
+        if 'hardware' in device and not isinstance(device['hardware'], dict):
+            raise ValueError('invalid hardware inventory')
+        if 'storage' in device and (not isinstance(device['storage'], list) or any(not isinstance(item, dict) for item in device['storage'])):
+            raise ValueError('invalid storage inventory')
         port_ids = set()
         for port in device.get('ports', []):
             if port.get('state') not in STATES or not isinstance(port.get('id'), str) or port['id'] in port_ids:

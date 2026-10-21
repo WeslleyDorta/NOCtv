@@ -31,10 +31,26 @@ when unknown; do not replace a stale sample with the HTTP retrieval time.
 Use finite nonnegative numbers for metrics; unavailable values are null.
 
 Metrics recognized by the interface include `latency_ms`, `uptime_seconds`,
-`cpu_percent`, `memory_percent`, `disk_percent`, `toner_percent`, `clients`.
+`cpu_percent`, `memory_percent`, `disk_percent`, `toner_percent`, `clients`,
+`toner_cyan_percent`, `toner_magenta_percent`, `toner_yellow_percent`,
+`temperature_celsius`, `power_watts`, `cpu_capacity_mhz`, `memory_total_bytes`
+and `disk_total_bytes`. These measurements are optional; adapters
+without these measurements leave the corresponding instruments unavailable.
 Percentages mean used percent, except toner means remaining percent. Convert
 fractions/bytes into those units in the adapter. Optional `vendor`, `os`, `model`
-feed conservative brand recognition. Explicit `brand` overrides use catalog IDs.
+feed conservative brand recognition. Optional `category` groups miscellaneous
+devices into named sections; absence falls back to device type. Explicit `brand` overrides use catalog IDs.
+
+Servers may additionally report a `hardware` object (`state`, `processor`,
+`fan_count`, `fan_state`, `power_supply_count`, `power_supply_state`, `drive_count`,
+`drive_state`) and a `storage` array of objects (`name`, `used_percent`,
+`capacity_bytes`). Optional `hardware_observed_at` and `storage_observed_at`
+provide independent sample clocks; otherwise `observed_at` applies. Stale or
+failed sources remove those readings, including during browser connection
+failures. Missing values remain unavailable. The demo supplies fictional examples;
+these fields do not imply that every adapter collects server hardware inventory.
+Charts contain samples observed in the current browser session, not a fabricated
+24-hour history.
 
 Ports have string `id`, `name`, `state`, `observed_at`, and optionally
 `admin_state`, `description`, `speed_mbps`, `rx_bps`, `tx_bps`, `required` and

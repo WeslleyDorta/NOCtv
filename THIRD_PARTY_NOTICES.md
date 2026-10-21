@@ -14,6 +14,9 @@ NOCtv source code is MIT licensed. Dependencies and assets retain their own lice
 - **Country outlines:** Natural Earth, public domain. Pinned source and
   reproduction steps are in [docs/maps.md](docs/maps.md).
 
+- **Brazil federative units:** IBGE simplified Malhas API v3 geometry. Source,
+  transformation and snapshot hash are documented in [docs/maps.md](docs/maps.md).
+
 No manufacturer faceplates, private screenshots, device-export images or other
 operational media are distributed. Generic device/interface drawings are part
 of the NOCtv source.

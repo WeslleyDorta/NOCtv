@@ -6,7 +6,7 @@ from zoneinfo import ZoneInfo
 from .geography import validate_map, public_map
 
 KINDS = {'switch', 'firewall', 'router', 'server', 'printer', 'wireless', 'device'}
-VIEWS = ['connections', 'switches', 'ports', 'servers', 'printers', 'wireless', 'devices']
+VIEWS = ['connections', 'servers', 'ports', 'switches', 'printers', 'wireless', 'devices']
 
 
 def load(path):

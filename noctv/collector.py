@@ -76,6 +76,12 @@ class Collector:
                     observed = d.get('metric_observed_at', {}).get(metric, d.get('observed_at'))
                     if bad or stale(observed, source['max_age_seconds']):
                         d['metrics'].pop(metric)
+                for field in ('hardware', 'storage'):
+                    observed = d.get(field + '_observed_at', d.get('observed_at'))
+                    if bad or stale(observed, source['max_age_seconds']):
+                        d.pop(field, None)
+                if d['stale']:
+                    d['management_state'] = 'unknown'
                 if bad:
                     d['management_state'] = 'unknown'
                     for service in d.get('services', []):

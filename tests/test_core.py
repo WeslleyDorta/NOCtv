@@ -54,13 +54,20 @@ class CollectorTests(unittest.TestCase):
         self.collector = Collector(load('config/demo.json'))
         self.collector.poll(self.collector.sources[0])
 
+    def test_invalid_optional_server_inventory_is_rejected(self):
+        for field, value in [('hardware', []), ('storage', {}), ('storage', [None])]:
+            batch = copy.deepcopy(self.collector.snapshot())
+            batch['devices'][0][field] = value
+            with self.assertRaises(ValueError):
+                validate(batch)
+
     def test_demo_contract_and_required_port_policy(self):
         snapshot = self.collector.snapshot()
         validate(snapshot)
-        self.assertEqual(len(snapshot['devices']), 16)
+        self.assertEqual(len(snapshot['devices']), 30)
         self.assertGreater(len(snapshot['links']), 0)
         self.assertTrue(any(a['severity'] == 'critical' for a in snapshot['alerts']))
-        self.assertFalse(any('port DOWN' in a['text'] for a in snapshot['alerts']))
+        self.assertEqual([a['text'] for a in snapshot['alerts'] if 'port DOWN' in a['text']], ['SWITCH-0108 · Gi16 required port DOWN'])
         d = self.collector.data['demo']['devices'][1]
         d['ports'][0]['state'] = 'down'
         self.assertTrue(any('required port DOWN' in a['text'] for a in self.collector.snapshot()['alerts']))
@@ -71,6 +78,7 @@ class CollectorTests(unittest.TestCase):
         self.assertTrue(all(d['state'] == 'unknown' and d['metrics'] == {} for d in snapshot['devices']))
         self.assertTrue(all(p['state'] == 'unknown' and p['rx_bps'] is None for d in snapshot['devices'] for p in d['ports']))
         self.assertTrue(all(l['state'] == 'unknown' for l in snapshot['links']))
+        self.assertFalse(any('hardware' in d or 'storage' in d for d in snapshot['devices']))
         self.assertFalse(any(a['severity'] == 'critical' for a in snapshot['alerts']))
 
     def test_fresh_metric_without_reachability_is_preserved(self):
@@ -85,7 +93,7 @@ class CollectorTests(unittest.TestCase):
         with patch('noctv.collector.Demo.collect', side_effect=RuntimeError('secret upstream response')):
             self.collector.poll(self.collector.sources[0])
         snapshot = self.collector.snapshot()
-        self.assertEqual(len(snapshot['devices']), 16)
+        self.assertEqual(len(snapshot['devices']), 30)
         self.assertTrue(all(d['state'] == 'unknown' for d in snapshot['devices']))
         self.assertNotIn('secret upstream', json.dumps(snapshot))
 

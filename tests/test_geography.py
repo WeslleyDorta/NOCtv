@@ -86,3 +86,13 @@ class GeographyTests(unittest.TestCase):
             self.assertTrue(all(math.isfinite(n) for n in mapped['bounds']), code)
             self.assertTrue(left < right and top < bottom, code)
             self.assertTrue(mapped['outlines'][0]['path'].startswith('M'), code)
+
+    def test_brazil_regions_follow_sites_without_corporate_defaults(self):
+        config = load('config/map-country.example.json')
+        regions = public(config)['map']['regions']
+        self.assertEqual(len(regions), 27)
+        self.assertEqual({r['id'] for r in regions if r['active']}, {'uf-26', 'uf-35', 'uf-43', 'uf-53'})
+        config['sites'] = []
+        self.assertFalse(any(r['active'] for r in public(config)['map']['regions']))
+        config['map']['country'] = 'US'
+        self.assertEqual(public(config)['map']['regions'], [])

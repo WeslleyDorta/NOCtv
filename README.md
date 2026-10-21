@@ -65,6 +65,11 @@ access to the installation machine; NOCtv itself requires no AI service or key.
 
 ![NOCtv demo: interface inspection](docs/images/port-detail.png)
 
+More synthetic views: [switches](docs/images/switches.png) ·
+[ports](docs/images/ports.png) · [servers](docs/images/servers.png) ·
+[printers](docs/images/printers.png) · [Wi-Fi](docs/images/wireless.png) ·
+[devices](docs/images/devices.png) · [site details](docs/images/site-detail.png).
+
 ## Integrations at a glance
 
 | Source | Included in this release |
