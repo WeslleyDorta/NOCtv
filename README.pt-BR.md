@@ -20,6 +20,21 @@ Acesse **http://localhost:8080**. Requer Docker e Compose 2.24 ou superior.
 A demonstração funciona sem credenciais e sem consultar equipamentos reais.
 Como alternativa local, use Python 3.12+: `python3 -m noctv serve`.
 
+## Instalar com um agente de IA
+
+Abra a pasta do projeto no seu agente e envie:
+
+> Leia AGENTS.md e docs/agent-install.md. Ajude-me a instalar o NOCtv e conectar
+> meu LibreNMS ou Zabbix. Verifique o ambiente, preserve configurações existentes,
+> me oriente a preencher credenciais localmente e valide os dados recebidos.
+
+O [roteiro de instalação](docs/agent-install.md) orienta a escolha da fonte,
+configuração, diagnóstico e recuperação. `AGENTS.md` concentra as instruções;
+`CLAUDE.md` importa esse mesmo arquivo para o Claude Code. Se o agente não carregar
+os arquivos automaticamente, peça a leitura explicitamente. Ele deve responder
+no seu idioma e precisa de acesso à máquina de instalação para executar comandos.
+O NOCtv funciona depois sem agente, assinatura ou chave de IA.
+
 ## Adaptar
 
 1. Copie `.env.example` para `.env`.

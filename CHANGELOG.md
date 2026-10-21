@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+- Shared `AGENTS.md` instructions, a `CLAUDE.md` import and an agent-guided
+  installation runbook for demo/live setup, source checks and recovery.
+
 ## 0.1.0 — Community preview
 
 - Configurable sites, device categories, source schedules and TV views.

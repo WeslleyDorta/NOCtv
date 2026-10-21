@@ -36,6 +36,20 @@ python3 -m noctv serve
 The Python preview server is for local evaluation. Docker uses Gunicorn. See
 [deployment](docs/setup.md) before exposing a live installation to other users.
 
+## Install with your coding agent
+
+Open this repository in your agent and ask:
+
+> Read AGENTS.md and docs/agent-install.md. Help me install NOCtv and connect my
+> LibreNMS or Zabbix. Inspect the environment, preserve existing configuration,
+> guide me to enter credentials locally, and verify actual telemetry.
+
+The [installation guide](docs/agent-install.md) covers demo/live setup,
+configuration, troubleshooting and recovery. `AGENTS.md` is the shared entry
+point; `CLAUDE.md` imports it for Claude Code. With other tools, explicitly ask
+the agent to read the files if they are not loaded automatically. The agent needs
+access to the installation machine; NOCtv itself requires no AI service or key.
+
 ## What is included
 
 - Connections, switches, ports, servers, printers, Wi-Fi and device views.

@@ -1,5 +1,9 @@
 # Installation and configuration
 
+For guided setup through a coding agent, start with the
+[agent installation guide](agent-install.md). It uses these same configuration
+files and commands; no separate installer or AI runtime is needed.
+
 ## Requirements
 
 - Docker Engine and Docker Compose 2.24+; or Python 3.12+ for a local preview.
