@@ -1,8 +1,8 @@
 # Repository presentation
 
-This file contains proposed repository metadata and release steps. Community code
-has been pushed; the metadata below does not apply itself, and no release tag is
-implied. See [validation status](release-readiness.md) for test evidence.
+The description, topics and video homepage below are configured on the public
+repository. Private vulnerability reporting is enabled. The initial release is
+[v0.1.0, community preview](https://github.com/WeslleyDorta/NOCtv/releases/tag/v0.1.0). See [validation status](release-readiness.md) for test evidence.
 
 ## About description
 
@@ -62,7 +62,7 @@ Desenvolvi o NOCtv para acompanhar a operação da rede pela TV: conexões entre
 unidades, topologia dos switches, estado das portas e alertas, com troca automática
 das telas.
 
-Estou preparando uma versão comunitária para quem quiser adaptar ao próprio
+Publiquei uma versão comunitária para quem quiser adaptar ao próprio
 ambiente. Ela tem integração com LibreNMS, Zabbix e Prometheus, além de checks de
 serviços e monitoramento de containers. Dá para testar a interface com dados
 fictícios antes de conectar qualquer equipamento.
@@ -71,6 +71,9 @@ Quero ouvir quem trabalha com NOC ou mantém um laboratório: o que seria mais �
 no seu dia a dia? O repositório explica os dados disponíveis em cada integração e
 como contribuir com outras.
 
-Add the public repository link only after confirming it is accessible and the
-published instructions match the released code. Reach depends on usefulness,
+Repository: https://github.com/WeslleyDorta/NOCtv
+
+Video tour: https://weslleydorta.github.io/NOCtv/video/?lang=pt-BR
+
+Use the repository link when sharing the project. Reach depends on usefulness,
 feedback and maintenance; these materials do not guarantee stars or adoption.

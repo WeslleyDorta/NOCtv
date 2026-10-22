@@ -1,5 +1,7 @@
 # NOCtv
 
+[![Checks](https://github.com/WeslleyDorta/NOCtv/actions/workflows/checks.yml/badge.svg?branch=main)](https://github.com/WeslleyDorta/NOCtv/actions/workflows/checks.yml) · [Prévia comunitária v0.1.0](https://github.com/WeslleyDorta/NOCtv/releases/tag/v0.1.0)
+
 **Sua rede em uma TV: conexões, topologia e incidentes sempre à vista.**
 
 Painel de monitoramento de rede para TVs e operações de NOC. Reúne dados do
@@ -30,6 +32,12 @@ docker compose up --build -d
 Acesse **http://localhost:8080**. Requer Docker e Compose 2.24 ou superior.
 A demonstração funciona sem credenciais e sem consultar equipamentos reais.
 Como alternativa local, use Python 3.12+: `python3 -m noctv serve`.
+Pare a demonstração com `docker compose down`.
+
+Para usar equipamentos reais, selecione uma configuração com `mode: live` e
+reinicie. O inventário começa vazio e é preenchido pelas coletas; a demonstração
+não se mistura aos seus dados. Apenas inserir uma chave não troca o modo.
+Veja o [fluxo de demonstração para dados reais](docs/setup.md#from-demo-to-live-data).
 
 ## Feito para acompanhar a operação
 
@@ -127,7 +135,8 @@ melhorias de instalação, traduções e exemplos fictícios.
 
 [Relatar problema ou sugerir integração](https://github.com/WeslleyDorta/NOCtv/issues/new/choose).
 Pode escrever em português ou inglês. Remova nomes, endereços, credenciais e alertas
-reais antes de compartilhar capturas ou respostas de API.
+reais antes de compartilhar capturas ou respostas de API. Para falhas de segurança,
+use o [canal privado](https://github.com/WeslleyDorta/NOCtv/security/advisories/new).
 
 Criado por **[Weslley Dorta](https://github.com/WeslleyDorta)**. Código sob licença
 [MIT](LICENSE); fontes e marcas têm licenças próprias.

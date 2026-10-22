@@ -1,6 +1,11 @@
 # Changelog
 
-## Unreleased
+## 0.1.0 — Community preview — 2026-10-22
+
+- Adapt equipment card columns and detail to available TV space; prioritize
+  incidents and summarize overflow with access to the full inventory.
+- Publish a 75-second animated tour with English and Portuguese captions,
+  chapters and synthetic data, plus an agent-guided installation prompt.
 
 - Add Services and Containers screens; hide/show screens per browser, excluding
   hidden screens from TV rotation while retaining collection and global alerts.
@@ -16,7 +21,7 @@
   and grouped device cards. Keep the shared navigation/ticker.
 - Bundle Brazil state boundaries and highlight only regions containing configured sites.
 - Show per-view summaries and collected session history; preserve unknown values.
-- Expand the offline synthetic scenario to 30 devices, including a required-port incident.
+- Include an offline synthetic scenario with a required-port incident.
 - Restore unit details with compact inventory, firewall interfaces/services and VPN readings.
 - Remove stale server hardware/storage readings after source or browser connection failures.
 - Verify port state changes in both the switch miniature and open detail dialog.
@@ -31,7 +36,7 @@
 - Shared `AGENTS.md` instructions, a `CLAUDE.md` import and an agent-guided
   installation runbook for demo/live setup, source checks and recovery.
 
-## 0.1.0 — Community preview
+### Core capabilities
 
 - Configurable sites, device categories, source schedules and TV views.
 - Synthetic demo with connections, switch interfaces and incident examples.

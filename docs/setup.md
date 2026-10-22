@@ -29,6 +29,18 @@ worker and multiple workers would duplicate polling. Additional viewers reuse
 the same snapshot. Thread count and collection periods should be adjusted only
 after measuring resource use and upstream API limits.
 
+## From demo to live data
+
+The default `config/demo.json` uses `mode: demo`: all devices and events are
+synthetic, and configured upstream connectors are not called. Adding credentials
+alone does not switch modes.
+
+To use your own environment, follow the live installation below and select a
+local configuration with `mode: live`. After restart, the inventory starts empty
+and fills from successful source polls; demo devices are not mixed into it. A
+source error is shown explicitly and never replaced with synthetic readings.
+Configured site names come from your local file, so replace the example sites too.
+
 ## Live installation
 
 ```sh

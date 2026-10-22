@@ -1,5 +1,7 @@
 # NOCtv
 
+[![Checks](https://github.com/WeslleyDorta/NOCtv/actions/workflows/checks.yml/badge.svg?branch=main)](https://github.com/WeslleyDorta/NOCtv/actions/workflows/checks.yml) · [v0.1.0 community preview](https://github.com/WeslleyDorta/NOCtv/releases/tag/v0.1.0)
+
 **A network operations dashboard built for the big screen.**
 
 See site connectivity, follow switch links and inspect ports from one TV dashboard.
@@ -156,7 +158,7 @@ Useful contributions start with a real monitoring need:
 
 [Report a problem or request an integration](https://github.com/WeslleyDorta/NOCtv/issues/new/choose).
 English and Portuguese reports are welcome. For a suspected security issue, use
-GitHub's private vulnerability reporting when enabled; do not publish exploit
+[private vulnerability reporting](https://github.com/WeslleyDorta/NOCtv/security/advisories/new); do not publish exploit
 credentials or private operational data in an issue.
 
 ## Contribute

@@ -10,10 +10,11 @@ Credentials stay on the collector side. Display config is allowlisted. Connector
 verify TLS, reject credential redirects and bound responses/timeouts. The web
 service exposes no configuration mutation or remote-command endpoint. Polling
 credentials should be read-only. Rejected authentication stops that source until
-restart. NOCtv does not perform scans or change devices.
+restart. NOCtv does not change devices. Optional diagnostics can run scoped Nmap checks
+only when explicitly enabled; see [diagnostic controls](docs/diagnostics.md).
 
-Use GitHub's private vulnerability reporting for this repository when available.
-If unavailable, contact the maintainer privately before publishing exploit details.
+Use [GitHub private vulnerability reporting](https://github.com/WeslleyDorta/NOCtv/security/advisories/new)
+for this repository. This channel is enabled; keep exploit details out of public issues.
 Never include live credentials in a report.
 
 The 0.1 release has automated fixture and browser checks, but is not a security
