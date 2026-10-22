@@ -6,7 +6,10 @@ const browser=await chromium.launch({headless:true,...(process.env.NOCTV_CHROMIU
 try {
  const page=await browser.newPage();
  const errors=[];page.on('pageerror',e=>errors.push(e.message));
- await page.goto(new URL('../../../docs/video/index.html',import.meta.url).href);
+ const url=process.argv[2]||new URL('../../../docs/video/index.html',import.meta.url).href;
+ await page.goto(url);
+ if(new URL(url).searchParams.get('lang')==='pt-BR')assert.equal(await page.locator('html').getAttribute('lang'),'pt-BR');
+ await page.selectOption('#language','en');
  await page.waitForFunction(()=>document.querySelector('video').readyState>=1);
  assert.equal(await page.locator('#chapters button').count(),13);
  assert.equal(await page.locator('video').evaluate(v=>v.duration),75);
@@ -19,6 +22,10 @@ try {
  assert(Math.abs(await page.locator('video').evaluate(v=>v.currentTime)-time)<1);
  assert.equal(await page.locator('html').getAttribute('lang'),'pt-BR');
  assert.match(await page.locator('button[data-start="20"]').innerText(),/recuperação/);
+ await page.locator('button[data-start="67"]').click();
+ await page.waitForFunction(()=>document.querySelector('video').currentTime>=67);
+ await page.locator('video').evaluate(v=>{v.currentTime=74;v.play();});
+ await page.waitForFunction(()=>document.querySelector('video').ended);
  assert.deepEqual(errors,[]);
- console.log('PASS: media loads, 13 chapters, seeking, language switch preserves playback, no browser errors');
+ console.log('PASS: media loads, 13 chapters, seeking, language switch preserves playback, plays through ending, no browser errors');
 } finally {await browser.close();}

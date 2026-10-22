@@ -13,9 +13,11 @@ conforme o tamanho da tela e a distância de leitura.
 
 [Executar demonstração](#executar-a-demonstração) · [Conhecer as telas](docs/tour.md) · [Integrações](docs/integrations.md) · [English](README.md)
 
-[![NOCtv em movimento: mapa e faixa de alertas](docs/video/preview.gif)](docs/video/README.md)
+[![NOCtv em movimento: mapa e faixa de alertas](docs/video/preview.gif)](https://weslleydorta.github.io/NOCtv/video/?lang=pt-BR)
 
-**Tour de 75 segundos:** [Português](https://github.com/WeslleyDorta/NOCtv/raw/refs/heads/main/docs/video/noctv-tour-pt-BR.mp4) · [English](https://github.com/WeslleyDorta/NOCtv/raw/refs/heads/main/docs/video/noctv-tour-en.mp4) · [Capítulos e player interativo](docs/video/README.md)
+*Prévia de 6 segundos. Clique na imagem para assistir aos 75 segundos completos.*
+
+**Tour de 75 segundos:** [Português](https://weslleydorta.github.io/NOCtv/video/?lang=pt-BR) · [English](https://weslleydorta.github.io/NOCtv/video/?lang=en) · [Capítulos e player interativo](https://weslleydorta.github.io/NOCtv/video/?lang=pt-BR)
 
 ## Executar a demonstração
 

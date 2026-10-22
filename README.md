@@ -15,9 +15,11 @@ distance.
 
 [Run the demo](#try-it) · [Screen tour](docs/tour.md) · [Connect your tools](#connect-your-tools) · [Português](README.pt-BR.md)
 
-[![Watch NOCtv: animated map and scrolling alerts](docs/video/preview.gif)](docs/video/README.md)
+[![Watch NOCtv: animated map and scrolling alerts](docs/video/preview.gif)](https://weslleydorta.github.io/NOCtv/video/?lang=en)
 
-**Watch the 75-second tour:** [English](https://github.com/WeslleyDorta/NOCtv/raw/refs/heads/main/docs/video/noctv-tour-en.mp4) · [Português](https://github.com/WeslleyDorta/NOCtv/raw/refs/heads/main/docs/video/noctv-tour-pt-BR.mp4) · [Chapters and interactive player](docs/video/README.md)
+*6-second preview. Click the image to play the full 75-second video.*
+
+**Watch the 75-second tour:** [English](https://weslleydorta.github.io/NOCtv/video/?lang=en) · [Português](https://weslleydorta.github.io/NOCtv/video/?lang=pt-BR) · [Chapters and interactive player](https://weslleydorta.github.io/NOCtv/video/?lang=en)
 
 > **0.1 community preview.** Screenshots and the default installation use synthetic
 > data. This release is fixture-tested, not certified against every vendor or

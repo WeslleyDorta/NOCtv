@@ -5,7 +5,11 @@
 [Watch / download in English](https://github.com/WeslleyDorta/NOCtv/raw/refs/heads/main/docs/video/noctv-tour-en.mp4) ·
 [Assistir / baixar em português](https://github.com/WeslleyDorta/NOCtv/raw/refs/heads/main/docs/video/noctv-tour-pt-BR.mp4)
 
-![Animated map and notification ticker](preview.gif)
+[![6-second preview — watch the full tour](preview.gif)](https://weslleydorta.github.io/NOCtv/video/)
+
+**[Play the full video with chapters / Assistir ao vídeo completo](https://weslleydorta.github.io/NOCtv/video/)**
+
+The GIF above is a 6-second preview. O GIF acima é uma prévia de 6 segundos.
 
 NOCtv is designed for monitoring on a TV from across the room and for opening
 sites, devices and ports from a nearby computer. The video records the actual
@@ -36,9 +40,9 @@ idiomas; a interface gravada continua em inglês.
 | 01:01 | Visible screens | Telas visíveis |
 | 01:07 | Demo-to-live setup | Da demonstração ao ambiente real |
 
-For a player with clickable chapters and language selection, clone/download the
-repository and open `docs/video/index.html` in your browser. GitHub's file viewer
-shows HTML source; it does not run this player. No separate service is required.
+Watch online using the player linked above: 75 seconds, playback controls,
+clickable chapters and language selection. You can also clone/download the
+repository and open `docs/video/index.html` locally, without a separate service.
 
 The devices and addresses are fictitious. Incident timing is scripted for the
 tour, not a promise of detection latency; real update times depend on each source
