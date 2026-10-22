@@ -1,0 +1,12 @@
+{
+  "mode": "live", "timezone": "UTC", "title": "NOCtv",
+  "display": {"views": ["connections", "containers"]},
+  "sites": [{"id": "lab", "name": "Example site", "x": 50, "y": 50}],
+  "connectors": [{
+    "id": "docker", "name": "Example Docker host", "type": "docker", "site": "lab",
+    "url_env": "DOCKER_API_URL", "api_version": "1.45",
+    "interval_seconds": 60, "max_age_seconds": 180, "max_containers": 50,
+    "collect_stats": false, "container_names": ["web", "worker"],
+    "devices": {"web": {"name": "Web application", "site": "lab"}}
+  }]
+}

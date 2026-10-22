@@ -61,7 +61,7 @@ def validate(batch):
         if not isinstance(device.get('id'), str) or device['id'] in ids or device.get('state') not in STATES:
             raise ValueError('invalid or duplicate device')
         ids.add(device['id'])
-        if device.get('type') not in {'switch', 'firewall', 'router', 'server', 'printer', 'wireless', 'device'}:
+        if device.get('type') not in {'switch', 'firewall', 'router', 'server', 'printer', 'wireless', 'device', 'service', 'container'}:
             raise ValueError('invalid device type')
         if 'hardware' in device and not isinstance(device['hardware'], dict):
             raise ValueError('invalid hardware inventory')

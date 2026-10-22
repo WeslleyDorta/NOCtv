@@ -44,7 +44,7 @@ class Prometheus:
         self.overrides = config.get('devices', {})
         if not isinstance(self.overrides, dict) or len(self.overrides) > self.limit or any(not isinstance(k, str) or not k or not isinstance(v, dict) for k, v in self.overrides.items()):
             raise SourceError('invalid_device_map')
-        if any(v.get('type', 'device') not in {'switch', 'router', 'firewall', 'server', 'printer', 'wireless', 'device'} for v in self.overrides.values()):
+        if any(v.get('type', 'device') not in {'switch', 'router', 'firewall', 'server', 'printer', 'wireless', 'device', 'service', 'container'} for v in self.overrides.values()):
             raise SourceError('invalid_device_type')
         if not isinstance(config.get('site_map', {}), dict) or ('site_label' in config and (not isinstance(config['site_label'], str) or not re.fullmatch(LABEL, config['site_label']))):
             raise SourceError('invalid_site_map')

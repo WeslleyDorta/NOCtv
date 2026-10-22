@@ -1,7 +1,9 @@
 # Working with NOCtv
 
-NOCtv is a self-hosted, read-only display for existing monitoring systems. It
-does not install LibreNMS/Zabbix, scan a network, or configure equipment.
+NOCtv is a self-hosted monitoring display with read-only source connectors,
+explicit service checks and optional network diagnostics. It does not install
+LibreNMS/Zabbix or configure equipment. Do not enable probes or diagnostic scans
+unless the operator authorized the target scope. Kali is not required.
 Respond in the user's language. Follow the user's requested scope; reading this
 file alone is not a request to install or deploy anything.
 
@@ -41,6 +43,8 @@ does not need an AI account or key.
 | Install, upgrade configuration, diagnose deployment | [docs/setup.md](docs/setup.md) |
 | Understand actual connector coverage | [docs/integrations.md](docs/integrations.md) |
 | Zabbix items, ports and permissions | [docs/zabbix.md](docs/zabbix.md) |
+| Native service checks, Docker and visible screens | [docs/services.md](docs/services.md) |
+| Portable tools and permitted diagnostic targets | [docs/diagnostics.md](docs/diagnostics.md) |
 | Direct firewall APIs | [docs/firewalls.md](docs/firewalls.md) |
 | Country/world maps and coordinates | [docs/maps.md](docs/maps.md) |
 | Add an adapter | [docs/connector-contract.md](docs/connector-contract.md) |

@@ -16,13 +16,16 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 
 
 class JSONClient:
-    def __init__(self, base, headers=None, ca_file=None, allow_http=False):
+    def __init__(self, base, headers=None, ca_file=None, allow_http=False, client_cert=None, client_key=None):
         self.base = base.rstrip('/') + '/'
         self.origin = urllib.parse.urlsplit(self.base)
         if self.origin.scheme not in (('https', 'http') if allow_http else ('https',)) or not self.origin.hostname or self.origin.username or self.origin.password or self.origin.query or self.origin.fragment:
             raise SourceError('invalid_api_url')
         self.headers = headers or {}
-        self.opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect(), urllib.request.HTTPSHandler(context=ssl.create_default_context(cafile=ca_file)))
+        context = ssl.create_default_context(cafile=ca_file)
+        if client_cert:
+            context.load_cert_chain(client_cert, client_key)
+        self.opener = urllib.request.build_opener(urllib.request.ProxyHandler({}), NoRedirect(), urllib.request.HTTPSHandler(context=context))
 
     def get(self, relative):
         target = urllib.parse.urljoin(self.base, relative)

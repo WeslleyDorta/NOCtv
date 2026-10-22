@@ -3,14 +3,15 @@ const $ = selector => document.querySelector(selector);
 const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const numeric = value => typeof value === 'number' && Number.isFinite(value);
 const num = (value, unit = '') => numeric(value) ? new Intl.NumberFormat('en', {maximumFractionDigits: 1}).format(value) + unit : '—';
-const icons = {connections:'⌁', switches:'▤', ports:'▦', servers:'▥', printers:'▧', wireless:'◉', devices:'◇', firewall:'⬡', switch:'▤', server:'▥', printer:'▧', router:'⌁', device:'◇'};
-const titles = {connections:'Connections', switches:'Switches', ports:'Ports', servers:'Servers', printers:'Printers', wireless:'Wi-Fi', devices:'Devices'};
-const descriptions = {connections:'Sites, firewalls and connections in one view', switches:'Discovered links and live interface states', ports:'Required interfaces first; unused ports are not incidents', servers:'Availability and collected system metrics', printers:'Printer availability and supplies when reported', wireless:'Access points and connected clients when reported', devices:'Network inventory grouped by category'};
+const icons = {connections:'⌁', switches:'▤', ports:'▦', servers:'▥', printers:'▧', wireless:'◉', devices:'◇', services:'◷', containers:'▣', service:'◷', container:'▣', firewall:'⬡', switch:'▤', server:'▥', printer:'▧', router:'⌁', device:'◇'};
+const titles = {connections:'Connections', switches:'Switches', ports:'Ports', servers:'Servers', printers:'Printers', wireless:'Wi-Fi', devices:'Devices', services:'Services', containers:'Containers'};
+const descriptions = {connections:'Sites, firewalls and connections in one view', switches:'Discovered links and live interface states', ports:'Required interfaces first; unused ports are not incidents', servers:'Availability and collected system metrics', printers:'Printer availability and supplies when reported', wireless:'Access points and connected clients when reported', devices:'Network inventory grouped by category', services:'HTTP / HTTPS, TCP, DNS and ICMP checks', containers:'Docker runtime, healthchecks and collected resource usage'};
 const severity = {down:0, attention:1, unknown:2, standby:3, up:4, disabled:5};
 let config, data, view='connections', siteFilter='', dialogState=null, rotate=false, rotateDeadline=0, lastSuccess=0, lastTicker='';
+let refreshTimer, refreshPending=false, soundEnabled=false, audioContext, knownCritical=null, rotationBase, hiddenViews=new Set(), diagnosticBusy=false;
 const history=new Map();
 let motion=localStorage.getItem('noctv-motion')!=='off';
-const cardLimit = () => {if(innerWidth<1000)return config.display.max_cards;const columns=view==='servers'?2:innerWidth<1500?4:5;const height=view==='servers'?430:view==='wireless'?300:view==='printers'?200:180;return Math.min(config.display.max_cards,columns*Math.max(1,Math.floor($('#stage').clientHeight/height)));};
+const cardLimit = () => {if(innerWidth<1000)return config.display.max_cards;const columns=view==='servers'?2:innerWidth<1500?4:5;const height=view==='servers'?430:['wireless','services','containers'].includes(view)?300:view==='printers'?200:180;return Math.min(config.display.max_cards,columns*Math.max(1,Math.floor($('#stage').clientHeight/height)));};
 const selected = () => data.devices.filter(d => !siteFilter || d.site===siteFilter);
 const state = (value='unknown') => `<span class="state" data-state="${esc(value)}">${esc(value.toUpperCase())}</span>`;
 const rate = value => !numeric(value) ? '—' : value>=1e6 ? num(value/1e6,' Mbps') : num(value/1e3,' kbps');
@@ -128,8 +129,13 @@ function portTable(){
  return `<div class="ports-workspace">${panel('Required ports DOWN','Unused ports are counted in the summary, without critical alerts',down,'down-panel')}${panel('Low speed','Active interfaces negotiated below 1 Gbps',slow,'speed-panel')}</div>`;
 }
 
+function monitorCard(d){
+ const m=d.metrics||{},container=d.type==='container';
+ const facts=container?[['Runtime',d.runtime_state||'unknown'],['Healthcheck',d.health_state||'unknown'],['Restarts',num(m.restart_count)]]:[['Response',num(m.latency_ms,' ms')],['HTTP status',num(m.http_status_code)],['TLS validity',num(m.certificate_days,' days')]];
+ return `<article class="device-card monitor-card" data-state="${esc(d.state)}">${webLink(d)}<span class="card-state">${state(d.state)}</span><button class="card-open" data-action="device" data-id="${esc(d.id)}"><span class="card-top">${brandIcon(d)}<span><h3>${esc(d.name)}</h3><span class="meta">${esc(d.category||d.model)}</span></span></span></button><p class="meta">${esc(siteName(d.site))}${d.ip?' · '+esc(d.ip):''}</p><div class="monitor-facts">${facts.filter(([label])=>container||label==='Response'||label==='HTTP status'&&numeric(m.http_status_code)||label==='TLS validity'&&numeric(m.certificate_days)).map(([label,value])=>`<div><small>${label}</small><strong>${esc(value)}</strong></div>`).join('')}</div>${container?`<div class="resources">${meter('Host CPU share',m.cpu_percent)}${meter('Memory',m.memory_percent)}</div>`:plot(d)}<p class="monitor-reason">${esc(d.stale?'Telemetry unavailable':(d.services||[]).map(x=>x.name).join(' · ')||(container?'Runtime is not an application availability check.':'Status reported by monitoring source.'))}</p><small class="monitor-observed">Observed ${esc(age(d.observed_at))} ago</small></article>`;
+}
 function devicesGrid(){
- const kinds={servers:['server'],printers:['printer'],wireless:['wireless'],devices:['device','router','firewall']};
+ const kinds={servers:['server'],printers:['printer'],wireless:['wireless'],devices:['device','router','firewall'],services:['service'],containers:['container']};
  const rows=selected().filter(d=>kinds[view].includes(d.type)).sort((a,b)=>severity[a.state]-severity[b.state]||a.type.localeCompare(b.type)||a.name.localeCompare(b.name)),shown=rows.slice(0,cardLimit());
  $('#coverage').textContent=`${shown.length}/${rows.length} devices · incidents first · missing measurements are not inferred`;
  if(!rows.length)return `<div class="empty">No ${esc(titles[view].toLowerCase())} reported in this scope. Configure device categories in your connector.</div>`;
@@ -138,14 +144,15 @@ function devicesGrid(){
   const groups=new Map();for(const d of shown){const name=d.category||({firewall:'Firewalls',router:'Routers'}[d.type])||'Other devices';if(!groups.has(name))groups.set(name,[]);groups.get(name).push(d);}
   return `<div class="device-categories">${[...groups].map(([name,ds])=>`<section class="equipment-category"><div class="category-head"><h2>${esc(name)}</h2><span>${ds.length} devices</span></div><div class="category-grid">${ds.map(card).join('')}</div></section>`).join('')}</div>`;
  }
- return `<div class="grid equipment-grid ${view}-grid">${shown.map(card).join('')}</div>`;
+ return `<div class="grid equipment-grid ${view}-grid">${shown.map(d=>['service','container'].includes(d.type)?monitorCard(d):card(d)).join('')}</div>`;
 }
 function summaryStats(){
- const kinds={connections:['firewall','router'],switches:['switch'],servers:['server'],printers:['printer'],wireless:['wireless'],devices:['device','router','firewall']};
+ const kinds={connections:['firewall','router'],switches:['switch'],servers:['server'],printers:['printer'],wireless:['wireless'],devices:['device','router','firewall'],services:['service'],containers:['container']};
  const ds=selected().filter(d=>view==='ports'||kinds[view]?.includes(d.type)),ports=ds.flatMap(d=>d.ports||[]);
  const average=key=>{const values=ds.map(d=>d.metrics?.[key]).filter(numeric);return values.length?values.reduce((a,b)=>a+b,0)/values.length:null;};
  const count=st=>ds.filter(d=>d.state===st).length;
  let stats=[[ds.length,titles[view],'Monitored in this view',''],[count('up'),'Online','Reported operational','good'],[count('down'),'Offline','Confirmed by source',count('down')?'bad':''],[num(average('latency_ms'),' ms'),'Mean latency','Reported measurements','cyan'],[count('unknown'),'Unknown','Missing or stale data','warn'],[ports.filter(p=>p.state==='up').length,'Ports UP',`${ports.length} interfaces collected`,'cyan']];
+ if(['services','containers'].includes(view)){stats[2][1]='Failed';stats[2][2]=view==='containers'?'Runtime / healthcheck failure':'Check did not pass';stats[4]=[count('attention'),'Attention','Needs investigation','warn'];stats[5]=[count('unknown'),'Unknown','Missing or stale data','warn'];if(view==='containers')stats[3]=[ds.filter(d=>d.health_state==='unhealthy').length,'Unhealthy','Reported healthcheck failures','bad'];}
  if(view==='switches')stats=[[ds.length,'Switches','Total monitored',''],[num(average('latency_ms'),' ms'),'Mean latency','Current samples','cyan'],[num(Math.max(0,...ds.map(d=>d.metrics?.latency_ms).filter(numeric))||null,' ms'),'Highest latency','Current samples','warn'],[num(average('cpu_percent'),'%'),'Mean CPU','Where reported',''],[count('down'),'Unavailable','Confirmed by source',count('down')?'bad':''],[count('unknown'),'Unknown','Missing or stale data','warn']];
  if(view==='ports'){
   const up=ports.filter(p=>p.state==='up').length,required=ports.filter(p=>p.required&&p.state==='down').length,unused=ports.filter(p=>!p.required&&p.state==='down').length;
@@ -164,7 +171,7 @@ function fitEquipment(){
  const stage=$('#stage'),bottom=stage.getBoundingClientRect().bottom;
  for(const card of stage.querySelectorAll('.device-card'))if(card.getBoundingClientRect().bottom>bottom+1)card.remove();
  for(const group of stage.querySelectorAll('.equipment-category'))if(!group.querySelector('.device-card'))group.remove();
- if(['servers','printers','wireless','devices'].includes(view))$('#coverage').textContent=$('#coverage').textContent.replace(/^\d+\//,stage.querySelectorAll('.device-card').length+'/');
+ if(['servers','printers','wireless','devices','services','containers'].includes(view))$('#coverage').textContent=$('#coverage').textContent.replace(/^\d+\//,stage.querySelectorAll('.device-card').length+'/');
 }
 function render(){
  if(!data||!config)return;
@@ -177,10 +184,11 @@ function render(){
  fitEquipment();
  $('#sources').textContent=data.sources.map(s=>`${s.id}: ${s.state} · ${age(s.last_success)} · interval ${s.interval_seconds}s`).join('  |  ');
  const critical=data.alerts.filter(a=>a.severity==='critical').length;$('.ticker').dataset.critical=String(critical>0);$('#alert-summary').textContent=critical?`${critical} critical`:`${data.alerts.length} alerts`;
+ $('#notification-count').textContent=data.alerts.length;$('#notification-count').hidden=!data.alerts.length;$('#notification-bell').dataset.critical=String(critical>0);$('#notification-bell').setAttribute('aria-label',`Open current notifications: ${data.alerts.length} alerts, ${critical} critical`);
  const ticker=(data.alerts.length?data.alerts:[{severity:'ok',text:config.mode==='demo'?'Demo data · Configure your sources to monitor your own environment':'No active alerts reported'}]).map(a=>`<span data-severity="${esc(a.severity)}">${esc(a.text)}</span>`).join('');
  if(ticker!==lastTicker){$('#ticker-track').innerHTML=ticker+ticker;lastTicker=ticker;}
  $('#ticker-headline').textContent=data.alerts.find(a=>a.severity==='critical')?.text||'Current network events';
- for(const a of $('#nav').children){const types={servers:['server'],switches:['switch'],printers:['printer'],wireless:['wireless'],devices:['device','router','firewall'],connections:['firewall','router']};const total=a.dataset.view==='ports'?data.devices.flatMap(d=>d.ports||[]).filter(p=>p.required&&p.state==='down').length:data.devices.filter(d=>types[a.dataset.view]?.includes(d.type)&&d.state==='down').length;let badge=a.querySelector('.nav-count');if(!badge){badge=document.createElement('span');badge.className='nav-count';a.append(badge);}badge.textContent=total;badge.hidden=!total;}
+ for(const a of $('#nav').children){const types={servers:['server'],switches:['switch'],printers:['printer'],wireless:['wireless'],devices:['device','router','firewall'],services:['service'],containers:['container'],connections:['firewall','router']};const total=a.dataset.view==='ports'?data.devices.flatMap(d=>d.ports||[]).filter(p=>p.required&&p.state==='down').length:data.devices.filter(d=>types[a.dataset.view]?.includes(d.type)&&d.state==='down').length;let badge=a.querySelector('.nav-count');if(!badge){badge=document.createElement('span');badge.className='nav-count';a.append(badge);}badge.textContent=total;badge.hidden=!total;}
  if(dialogState)renderDialog();
  if(key){const next=[...document.querySelectorAll('[data-action]')].find(e=>e.dataset.action===key.action&&e.dataset.id===key.id&&e.dataset.port===key.port);next?.focus({preventScroll:true});}
 }
@@ -202,29 +210,85 @@ function renderDialog(){
  $('#dialog-title').textContent=d.name;$('#dialog-eyebrow').textContent=[siteName(d.site),d.model,d.ip].filter(Boolean).join(' · ');
  const ports=d.ports||[];if(!s.port&&ports.length)s.port=ports[0].id;
  const metrics=Object.entries(d.metrics||{}).filter(([,v])=>numeric(v));
- $('#dialog-body').innerHTML=`<div class="details-summary">${state(d.state)}<span>Source ${esc(d.source)}</span>${d.management_state?`<span>Management API: ${esc(d.management_state)}</span>`:''}<span>Observed ${esc(age(d.observed_at))} ago</span>${d.stale?'<span class="warn">Telemetry stale; state is unknown</span>':''}</div>${metrics.length?`<div class="detail-fields">${metrics.map(([k,v])=>`<div><span>${esc(k.replaceAll('_',' '))}</span>${num(v)}</div>`).join('')}</div>`:''}${ports.length?`<section class="port-panel"><div class="port-panel-header"><strong>${esc(d.model||'Interfaces')}</strong><span>${ports.filter(p=>p.state==='up').length} UP / ${ports.length} interfaces</span></div><div class="ports">${ports.map(p=>`<button class="port" data-action="port" data-id="${esc(d.id)}" data-port="${esc(p.id)}" data-state="${esc(p.state)}" aria-pressed="${s.port===p.id}" aria-label="${esc(p.name)} ${esc(p.state)}">${esc(p.name)}</button>`).join('')}</div><p class="note">Logical interface diagram · positions are not a manufacturer faceplate.</p></section><section class="port-detail">${portDetail(d,ports.find(p=>p.id===s.port))}</section>`:'<p class="empty">This source has not reported interface data for this device.</p>'}${d.services?.length?`<h3>Reported services</h3><div class="alert-list">${d.services.map(x=>`<article>${esc(x.name)} · ${esc(x.state)}</article>`).join('')}</div>`:''}`;
+ $('#dialog-body').innerHTML=`<div class="details-summary">${state(d.state)}<span>Source ${esc(d.source)}</span>${d.management_state?`<span>Management API: ${esc(d.management_state)}</span>`:''}<span>Observed ${esc(age(d.observed_at))} ago</span>${d.stale?'<span class="warn">Telemetry stale; state is unknown</span>':''}</div>${metrics.length?`<div class="detail-fields">${metrics.map(([k,v])=>`<div><span>${esc(k.replaceAll('_',' '))}</span>${num(v)}</div>`).join('')}</div>`:''}${d.type==='container'?`<div class="detail-fields"><div><span>Runtime</span>${esc(d.runtime_state||'unknown')}</div><div><span>Healthcheck</span>${esc(d.health_state||'unknown')}</div></div>`:''}${ports.length?`<section class="port-panel"><div class="port-panel-header"><strong>${esc(d.model||'Interfaces')}</strong><span>${ports.filter(p=>p.state==='up').length} UP / ${ports.length} interfaces</span></div><div class="ports">${ports.map(p=>`<button class="port" data-action="port" data-id="${esc(d.id)}" data-port="${esc(p.id)}" data-state="${esc(p.state)}" aria-pressed="${s.port===p.id}" aria-label="${esc(p.name)} ${esc(p.state)}">${esc(p.name)}</button>`).join('')}</div><p class="note">Logical interface diagram · positions are not a manufacturer faceplate.</p></section><section class="port-detail">${portDetail(d,ports.find(p=>p.id===s.port))}</section>`:['service','container'].includes(d.type)?'':'<p class="empty">This source has not reported interface data for this device.</p>'}${d.services?.length?`<h3>Reported services</h3><div class="alert-list">${d.services.map(x=>`<article>${esc(x.name)} · ${esc(x.state)}</article>`).join('')}</div>`:''}`;
 }
 function openDialog(type,id,port){dialogState={type,id,port};renderDialog();if(!$('#details').open)$('#details').showModal();}
-function navigate(next){view=config.display.views.includes(next)?next:config.display.views[0];$('#title').textContent=titles[view];$('#subtitle').textContent=descriptions[view];document.title=`${titles[view]} · ${config.title}`;for(const a of $('#nav').children)a.setAttribute('aria-current',a.dataset.view===view?'page':'false');rotateDeadline=Date.now()+1000*(view==='connections'?config.display.connections_seconds:config.display.rotate_seconds);render();}
+function viewDuration(){return Math.round(rotationBase*(view==='connections'?Math.max(1,config.display.connections_seconds/config.display.rotate_seconds):1));}
+function updateRotation(){if(!config)return;$('#rotate span').textContent=rotate?`Auto ON (${viewDuration()}s)`:'Auto paused';$('#rotate').setAttribute('aria-pressed',String(rotate));}
+function resetRotation(){rotateDeadline=Date.now()+viewDuration()*1000;updateRotation();}
+function visibleViews(){return config.display.views.filter(v=>!hiddenViews.has(v));}
+function renderNavigation(){
+ $('#nav').innerHTML=visibleViews().map(v=>`<a href="#${v}" data-view="${v}"><span aria-hidden="true">${icons[v]}</span>${titles[v]}</a>`).join('');
+ $('#visible-views').innerHTML=config.display.views.map(v=>`<label><input type="checkbox" value="${v}" ${hiddenViews.has(v)?'':'checked'}>${titles[v]}</label>`).join('');
+}
+function navigate(next){const available=visibleViews();view=available.includes(next)?next:available[0];$('#title').textContent=titles[view];$('#subtitle').textContent=descriptions[view];document.title=`${titles[view]} · ${config.title}`;for(const a of $('#nav').children)a.setAttribute('aria-current',a.dataset.view===view?'page':'false');resetRotation();render();}
 function applyMotion(){document.body.classList.toggle('no-motion',!motion);$('#motion').textContent=motion?'Motion on':'Motion off';$('#motion').setAttribute('aria-pressed',String(motion));}
+function applyDisplay(){
+ const profile=$('#tv-profile').value,scale=innerWidth>=3000&&profile!=='1080p'?2:1;
+ document.body.dataset.tvProfile=profile;document.body.style.zoom=String(scale);
+ document.body.style.height=innerWidth>=1000?`${innerHeight/scale}px`:'';
+}
+function updateFreshness(){
+ if(!config)return;
+ const fresh=lastSuccess&&Date.now()-lastSuccess<=config.display.refresh_seconds*2500&&$('#error').hidden;
+ const healthy=fresh&&data?.sources.every(s=>s.state==='ok');
+ $('#freshness').classList.toggle('bad',!healthy);
+ $('#freshness span').textContent=lastSuccess?`${config.mode==='demo'?'Demo data':'Telemetry'} · ${age(new Date(lastSuccess).toISOString())}`:'Connecting…';
+ $('#freshness').setAttribute('aria-label',`${$('#freshness span').textContent}. Refresh displayed data`);
+ $('#updated').textContent=lastSuccess?'Updated '+new Intl.DateTimeFormat('en-GB',{timeZone:config.timezone,hour:'2-digit',minute:'2-digit',second:'2-digit'}).format(lastSuccess):'Updated —';
+}
+function playAlert(){
+ if(!soundEnabled||audioContext?.state!=='running')return;
+ const oscillator=audioContext.createOscillator(),gain=audioContext.createGain(),time=audioContext.currentTime;
+ oscillator.frequency.value=660;gain.gain.setValueAtTime(0,time);gain.gain.linearRampToValueAtTime(.06,time+.02);gain.gain.exponentialRampToValueAtTime(.001,time+.25);
+ oscillator.connect(gain);gain.connect(audioContext.destination);oscillator.start(time);oscillator.stop(time+.26);oscillator.onended=()=>{oscillator.disconnect();gain.disconnect();};
+}
+async function openTools(){
+ $('#tools-dialog').showModal();
+ try{const response=await fetch('/api/v1/diagnostics');if(!response.ok)throw Error();const result=await response.json();
+  $('#diagnostic-status').textContent=result.mode==='demo'?'DEMO · results are simulated; no network requests are made.':result.enabled?'Diagnostics enabled for configured networks.':'Disabled. Enable diagnostics and allowed_cidrs in the server configuration.';
+  $('#diagnostic-tool').innerHTML=result.tools.map(t=>`<option value="${esc(t.id)}" ${!t.available?'disabled':''}>${esc(t.label)}${t.available?'':` · missing ${esc(t.binary)}`}</option>`).join('');
+  $('#diagnostic-run').disabled=diagnosticBusy||!result.enabled||!result.tools.some(t=>t.available);
+ }catch{$('#diagnostic-status').textContent='Could not load diagnostic capabilities. Close and reopen to retry.';$('#diagnostic-run').disabled=true;}
+}
 async function refresh(){
- try{const response=await fetch('/api/v1/snapshot',{cache:'no-store'});if(!response.ok)throw Error('snapshot_unavailable');const next=await response.json();if(next.schema_version!==1||!Array.isArray(next.devices)||!Array.isArray(next.links))throw Error('invalid_snapshot');data=next;for(const d of data.devices){const samples=history.get(d.id)||[],time=Date.parse(d.observed_at);if(Number.isFinite(time)&&samples.at(-1)?.time!==time)samples.push({time,...d.metrics});history.set(d.id,samples.slice(-120));}for(const id of history.keys())if(!data.devices.some(d=>d.id===id))history.delete(id);lastSuccess=Date.now();$('#error').hidden=true;render();}
- catch{const error=$('#error');error.hidden=false;error.textContent='Telemetry could not be refreshed. Displayed states are unknown until the connection recovers.';if(data){data={...data,devices:data.devices.map(d=>({...d,state:'unknown',stale:true,metrics:{},hardware:{},storage:[],management_state:'unknown',services:(d.services||[]).map(x=>({...x,state:'unknown'})),ports:(d.ports||[]).map(p=>({...p,state:'unknown',rx_bps:null,tx_bps:null}))})),links:data.links.map(l=>({...l,state:'unknown',traffic_bps:null})),alerts:[{severity:'warning',text:'Connection to NOCtv telemetry interrupted'}]};render();}}
- finally{setTimeout(refresh,(document.hidden?30:config.display.refresh_seconds)*1000);}
+ if(refreshPending||!config)return;clearTimeout(refreshTimer);refreshPending=true;$('#freshness').disabled=true;
+ try{const response=await fetch('/api/v1/snapshot',{cache:'no-store'});if(!response.ok)throw Error('snapshot_unavailable');const next=await response.json();if(next.schema_version!==1||!Array.isArray(next.devices)||!Array.isArray(next.links))throw Error('invalid_snapshot');data=next;const critical=new Set(data.alerts.filter(a=>a.severity==='critical').map(a=>a.id||a.text));if(knownCritical&&[...critical].some(id=>!knownCritical.has(id))){try{playAlert();}catch{soundEnabled=false;$('#sound').textContent='Sound unavailable';$('#sound').setAttribute('aria-pressed','false');}}knownCritical=critical;for(const d of data.devices){const samples=history.get(d.id)||[],time=Date.parse(d.observed_at);if(Number.isFinite(time)&&samples.at(-1)?.time!==time)samples.push({time,...d.metrics});history.set(d.id,samples.slice(-120));}for(const id of history.keys())if(!data.devices.some(d=>d.id===id))history.delete(id);lastSuccess=Date.now();$('#error').hidden=true;render();updateFreshness();}
+ catch{const error=$('#error');error.hidden=false;error.textContent='Telemetry could not be refreshed. Displayed states are unknown until the connection recovers.';if(data){data={...data,devices:data.devices.map(d=>({...d,state:'unknown',stale:true,metrics:{},hardware:{},storage:[],management_state:'unknown',runtime_state:'unknown',health_state:'unknown',services:(d.services||[]).map(x=>({...x,state:'unknown'})),ports:(d.ports||[]).map(p=>({...p,state:'unknown',rx_bps:null,tx_bps:null}))})),links:data.links.map(l=>({...l,state:'unknown',traffic_bps:null})),alerts:[{severity:'warning',text:'Connection to NOCtv telemetry interrupted'}]};render();}}
+ finally{refreshPending=false;$('#freshness').disabled=false;refreshTimer=setTimeout(refresh,(document.hidden?30:config.display.refresh_seconds)*1000);}
 }
 async function boot(){
- try{const response=await fetch('/api/v1/config');if(!response.ok)throw Error('config');config=await response.json();$('#mode').textContent=config.mode==='demo'?'DEMO · SIMULATED':'LIVE';$('#mode').classList.toggle('demo',config.mode==='demo');$('#nav').innerHTML=config.display.views.map(v=>`<a href="#${v}" data-view="${v}"><span aria-hidden="true">${icons[v]}</span>${titles[v]}</a>`).join('');$('#site-filter').innerHTML='<option value="">All sites</option>'+config.sites.map(s=>`<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('')+'<option value="unassigned">Unassigned</option>';navigate(location.hash.slice(1));applyMotion();await refresh();}
+ try{const response=await fetch('/api/v1/config');if(!response.ok)throw Error('config');config=await response.json();rotationBase=Number(localStorage.getItem('noctv-rotate-seconds'))||config.display.rotate_seconds;rotationBase=Math.max(5,Math.min(600,Math.round(rotationBase)));$('#rotate-seconds').value=rotationBase;rotate=localStorage.getItem('noctv-rotate')==='on';$('#tv-profile').value=['1080p','4k'].includes(localStorage.getItem('noctv-tv-profile'))?localStorage.getItem('noctv-tv-profile'):'auto';applyDisplay();$('#mode').textContent=config.mode==='demo'?'DEMO · SIMULATED':'LIVE';$('#mode').classList.toggle('demo',config.mode==='demo');try{const saved=JSON.parse(localStorage.getItem('noctv-hidden-views')||'[]');hiddenViews=new Set(Array.isArray(saved)?saved.filter(v=>config.display.views.includes(v)):[]);}catch{hiddenViews.clear();}if(!visibleViews().length)hiddenViews.clear();renderNavigation();$('#site-filter').innerHTML='<option value="">All sites</option>'+config.sites.map(s=>`<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('')+'<option value="unassigned">Unassigned</option>';navigate(location.hash.slice(1));applyMotion();await refresh();}
  catch{$('#error').hidden=false;$('#error').textContent='Configuration unavailable. Retrying…';setTimeout(boot,5000);}
 }
 document.addEventListener('click',event=>{const button=event.target.closest('[data-action]');if(!button||!data)return;const {action,id,port}=button.dataset;if(action==='port'){dialogState.port=port;renderDialog();[...$('#dialog-body').querySelectorAll('[data-action="port"]')].find(b=>b.dataset.port===port)?.focus({preventScroll:true});}else if(['site','device','alerts'].includes(action))openDialog(action,id,port);});
-$('#details').addEventListener('close',()=>{dialogState=null;rotateDeadline=Date.now()+1000*(config?.display.rotate_seconds||25);});$('#close-dialog').addEventListener('click',()=>$('#details').close());
+$('#details').addEventListener('close',()=>{dialogState=null;if(config)resetRotation();});$('#close-dialog').addEventListener('click',()=>$('#details').close());
 $('#site-filter').addEventListener('change',event=>{siteFilter=event.target.value;render();});
 $('#motion').addEventListener('click',()=>{motion=!motion;localStorage.setItem('noctv-motion',motion?'on':'off');applyMotion();});
-$('#rotate').addEventListener('click',()=>{rotate=!rotate;$('#rotate').textContent=rotate?'TV loop on':'Start TV loop';$('#rotate').setAttribute('aria-pressed',String(rotate));rotateDeadline=Date.now()+1000*(view==='connections'?config.display.connections_seconds:config.display.rotate_seconds);});
+$('#rotate').addEventListener('click',()=>{if(!config)return;rotate=!rotate;localStorage.setItem('noctv-rotate',rotate?'on':'off');resetRotation();});
+$('#rotate-seconds').addEventListener('change',()=>{if(!config)return;const input=$('#rotate-seconds');if(!input.checkValidity()||!Number.isFinite(input.valueAsNumber)){input.value=rotationBase;return;}rotationBase=input.valueAsNumber;localStorage.setItem('noctv-rotate-seconds',rotationBase);resetRotation();});
+$('#tv-profile').addEventListener('change',()=>{localStorage.setItem('noctv-tv-profile',$('#tv-profile').value);applyDisplay();if(data)render();});
+$('#freshness').addEventListener('click',refresh);
+$('#sound').addEventListener('click',async()=>{try{if(!soundEnabled){audioContext??=new AudioContext();await audioContext.resume();if(audioContext.state!=='running')throw Error();}soundEnabled=!soundEnabled;$('#sound').textContent=soundEnabled?'Sound ON':'Sound OFF';$('#sound').setAttribute('aria-pressed',String(soundEnabled));}catch{$('#sound').textContent='Sound blocked';$('#sound').title='Browser audio is unavailable. Check this site’s audio permission.';}});
+$('#visible-views').addEventListener('change',event=>{
+ const input=event.target;if(input.type!=='checkbox')return;
+ if(!input.checked&&visibleViews().length===1){input.checked=true;$('#views-status').textContent='Keep at least one screen visible.';return;}
+ if(input.checked)hiddenViews.delete(input.value);else hiddenViews.add(input.value);
+ localStorage.setItem('noctv-hidden-views',JSON.stringify([...hiddenViews]));const current=view;renderNavigation();navigate(current);
+ if(current!==view)window.history.replaceState(null,'','#'+view);
+ $('#views-status').textContent='Saved for this browser. Collection and alerts remain active.';
+ $('#visible-views').querySelector(`input[value="${input.value}"]`)?.focus();
+});
+$('#views-reset').addEventListener('click',()=>{hiddenViews.clear();localStorage.removeItem('noctv-hidden-views');renderNavigation();navigate(view);$('#views-status').textContent='Installation defaults restored.';});
+$('#tools-open').addEventListener('click',openTools);$('#tools-close').addEventListener('click',()=>$('#tools-dialog').close());$('#tools-dialog').addEventListener('close',()=>{if(config)resetRotation();});
+$('#diagnostic-form').addEventListener('submit',async event=>{event.preventDefault();const run=$('#diagnostic-run');if(run.disabled||diagnosticBusy)return;diagnosticBusy=true;run.disabled=true;$('#diagnostic-output').textContent='Running diagnostic…';
+ try{const response=await fetch('/api/v1/diagnostics/run',{method:'POST',headers:{'Content-Type':'application/json','X-NOCtv-Request':'diagnostic'},body:JSON.stringify({tool:$('#diagnostic-tool').value,target:$('#diagnostic-target').value.trim()}),signal:AbortSignal.timeout(40000)});const result=await response.json();$('#diagnostic-output').textContent=result.error||`${result.simulated?'SIMULATED · ':''}Exit ${result.exit_code}\n${result.output}`;}
+ catch{$('#diagnostic-output').textContent='The diagnostic request failed or timed out. The server limits each run to 35 seconds.';}finally{diagnosticBusy=false;run.disabled=false;}
+});
 $('#ticker-pause').addEventListener('click',()=>{const paused=$('.ticker').classList.toggle('paused');$('#ticker-pause').setAttribute('aria-pressed',String(paused));$('#ticker-pause').setAttribute('aria-label',paused?'Resume alert scrolling':'Pause alert scrolling');});
 $('#fullscreen').addEventListener('click',async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch{$('#error').hidden=false;$('#error').textContent='Fullscreen was not allowed by this browser.';}});
-window.addEventListener('resize',()=>{if(data)render();});
+window.addEventListener('resize',()=>{applyDisplay();if(data)render();});
 window.addEventListener('hashchange',()=>{if(config)navigate(location.hash.slice(1));});
 document.addEventListener('visibilitychange',()=>document.body.classList.toggle('page-hidden',document.hidden));
-setInterval(()=>{if(!config)return;const fresh=lastSuccess&&Date.now()-lastSuccess<=config.display.refresh_seconds*2500;$('#freshness').classList.toggle('bad',!fresh);$('#freshness').textContent=lastSuccess?`Updated ${age(new Date(lastSuccess).toISOString())} ago`:'Waiting for telemetry';if(rotate&&!document.hidden&&!$('#details').open&&Date.now()>=rotateDeadline){const i=config.display.views.indexOf(view);location.hash=config.display.views[(i+1)%config.display.views.length];}},1000);
+setInterval(()=>{if(!config)return;updateFreshness();if(rotate&&!document.hidden&&!$('#details').open&&!$('#tools-dialog').open&&Date.now()>=rotateDeadline){const available=visibleViews(),i=available.indexOf(view);location.hash=available[(i+1)%available.length];resetRotation();}},1000);
 boot();

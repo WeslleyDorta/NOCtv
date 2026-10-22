@@ -10,9 +10,11 @@ from .connectors.forcepoint import Forcepoint
 from .connectors.zabbix import Zabbix
 from .connectors.prometheus import Prometheus
 from .connectors.netbox import NetBox
+from .connectors.probes import Probes
+from .connectors.docker import Docker
 from .connectors.firewalls import FortiGate, PANOS, CheckPoint, SophosCentral
 
-ADAPTERS = {'librenms': LibreNMS, 'forcepoint': Forcepoint, 'zabbix': Zabbix, 'fortigate': FortiGate, 'panos': PANOS, 'checkpoint': CheckPoint, 'sophos_central': SophosCentral, 'prometheus': Prometheus, 'netbox': NetBox}
+ADAPTERS = {'librenms': LibreNMS, 'forcepoint': Forcepoint, 'zabbix': Zabbix, 'fortigate': FortiGate, 'panos': PANOS, 'checkpoint': CheckPoint, 'sophos_central': SophosCentral, 'prometheus': Prometheus, 'netbox': NetBox, 'probes': Probes, 'docker': Docker}
 
 
 class Collector:
@@ -82,7 +84,10 @@ class Collector:
                         d.pop(field, None)
                 if d['stale']:
                     d['management_state'] = 'unknown'
-                if bad:
+                    for field in ('runtime_state', 'health_state'):
+                        if field in d:
+                            d[field] = 'unknown'
+                if bad or d['stale']:
                     d['management_state'] = 'unknown'
                     for service in d.get('services', []):
                         service['state'] = 'unknown'
@@ -93,7 +98,10 @@ class Collector:
                     if p.get('required') and p['state'] == 'down' and d['state'] != 'down':
                         alerts.append({'id': d['id'] + ':port:' + p['id'], 'severity': 'critical', 'text': d['name'] + ' · ' + p['name'] + ' required port DOWN', 'device_id': d['id']})
                 if d['state'] == 'down':
-                    alerts.append({'id': d['id'], 'severity': 'critical', 'text': d['name'] + ' offline', 'device_id': d['id']})
+                    reason = 'check failed' if d['type'] == 'service' else 'healthcheck failed' if d.get('health_state') == 'unhealthy' else 'container unavailable' if d['type'] == 'container' else 'offline'
+                    alerts.append({'id': d['id'], 'severity': 'critical', 'text': d['name'] + ' · ' + reason, 'device_id': d['id']})
+                elif d['type'] in ('service', 'container') and d['state'] == 'attention':
+                    alerts.append({'id': d['id'], 'severity': 'warning', 'text': d['name'] + ' · needs attention', 'device_id': d['id']})
                 devices.append(d)
             by_id = {d['id']: d for d in batch['devices']}
             for link in batch['links']:

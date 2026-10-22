@@ -20,7 +20,7 @@ A minimal response:
 ```
 
 Use `<connector id>:<native id>` for globally unique stable IDs. Device types:
-`switch`, `router`, `firewall`, `server`, `printer`, `wireless`, `device`.
+`switch`, `router`, `firewall`, `server`, `printer`, `wireless`, `device`, `service`, `container`.
 States: `up`, `down`, `attention`, `standby`, `disabled`, `unknown`.
 Missing evidence is unknown, not down or up. Never infer an outage from a failed
 API login, or device availability from a monitoring-enabled flag.
@@ -34,7 +34,7 @@ Metrics recognized by the interface include `latency_ms`, `uptime_seconds`,
 `cpu_percent`, `memory_percent`, `disk_percent`, `toner_percent`, `clients`,
 `toner_cyan_percent`, `toner_magenta_percent`, `toner_yellow_percent`,
 `temperature_celsius`, `power_watts`, `cpu_capacity_mhz`, `memory_total_bytes`
-and `disk_total_bytes`. These measurements are optional; adapters
+`disk_total_bytes`, `http_status_code`, `certificate_days` and `restart_count`. These measurements are optional; adapters
 without these measurements leave the corresponding instruments unavailable.
 Percentages mean used percent, except toner means remaining percent. Convert
 fractions/bytes into those units in the adapter. Optional `vendor`, `os`, `model`
@@ -86,3 +86,13 @@ The API exposes `/api/v1/config` (allowlisted display settings) and
 `sources`, `alerts`). Adding optional fields is compatible; changing field
 semantics requires a versioned contract change. Browser refreshes never trigger
 collection. Each source has one polling thread, with no overlapping cycles.
+
+Service/container states use the same freshness and alerts policy, independently
+of screen visibility. Native check timestamps represent the check completion;
+Docker runtime timestamps represent inspection. Containers additionally expose
+`runtime_state` and `health_state`, cleared to unknown when stale. No container
+inspect configuration, environment, mount or log payload may enter the contract.
+
+Optional diagnostic endpoints are `GET /api/v1/diagnostics` (capabilities) and
+`POST /api/v1/diagnostics/run` (fixed tools, explicit allowed targets). They are
+separate from source polling; see [diagnostics](diagnostics.md).

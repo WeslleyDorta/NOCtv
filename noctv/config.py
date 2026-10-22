@@ -4,9 +4,12 @@ import re
 from pathlib import Path
 from zoneinfo import ZoneInfo
 from .geography import validate_map, public_map
+from .diagnostics import validate_config as validate_diagnostics
+from .connectors.probes import validate_probes
+from .connectors.docker import validate_docker
 
-KINDS = {'switch', 'firewall', 'router', 'server', 'printer', 'wireless', 'device'}
-VIEWS = ['connections', 'servers', 'ports', 'switches', 'printers', 'wireless', 'devices']
+KINDS = {'switch', 'firewall', 'router', 'server', 'printer', 'wireless', 'device', 'service', 'container'}
+VIEWS = ['connections', 'servers', 'ports', 'switches', 'printers', 'wireless', 'devices', 'services', 'containers']
 
 
 def load(path):
@@ -16,6 +19,7 @@ def load(path):
     c.setdefault('title', 'NOCtv')
     c.setdefault('timezone', 'UTC')
     ZoneInfo(c['timezone'])
+    validate_diagnostics(c)
     c.setdefault('display', {})
     d = c['display']
     for key, default, low, high in [('refresh_seconds', 5, 2, 300), ('rotate_seconds', 25, 5, 600), ('connections_seconds', 45, 5, 600), ('max_cards', 16, 4, 48)]:
@@ -43,13 +47,21 @@ def load(path):
         if not re.fullmatch(r'[a-zA-Z0-9_-]{1,64}', source['id']) or source['id'] in seen:
             raise ValueError('connector ids must be unique')
         seen.add(source['id'])
-        if source['type'] not in ('librenms', 'forcepoint', 'zabbix', 'fortigate', 'panos', 'checkpoint', 'sophos_central', 'prometheus', 'netbox'):
+        if source['type'] not in ('librenms', 'forcepoint', 'zabbix', 'fortigate', 'panos', 'checkpoint', 'sophos_central', 'prometheus', 'netbox', 'probes', 'docker'):
             raise ValueError('unsupported connector type')
         for key, default in [('interval_seconds', 60), ('max_age_seconds', 600)]:
             source.setdefault(key, default)
             if type(source[key]) is not int or not 10 <= source[key] <= 86400:
                 raise ValueError('invalid connector period')
         source.setdefault('site_map', {})
+        if source['type'] == 'probes':
+            validate_probes(source)
+            if any(check.get('site', 'unassigned') not in {'unassigned', *(s['id'] for s in c['sites'])} for check in source['checks']):
+                raise ValueError('probe references an unknown site')
+        if source['type'] == 'docker':
+            validate_docker(source)
+            if source.get('site', 'unassigned') not in {'unassigned', *(s['id'] for s in c['sites'])}:
+                raise ValueError('docker references an unknown site')
         if any(s not in {x['id'] for x in c['sites']} for s in source['site_map'].values()):
             raise ValueError('site_map references an unknown site')
         for override in source.get('devices', {}).values():

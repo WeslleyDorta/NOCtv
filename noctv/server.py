@@ -9,6 +9,7 @@ from pathlib import Path
 from .config import load, public
 from .collector import Collector
 from .brands import catalog
+from .diagnostics import Diagnostics
 
 ROOT = Path(__file__).resolve().parent.parent
 
@@ -21,6 +22,7 @@ class Application:
         if self.config['mode'] == 'live' and (not self.user or len(self.password) < 16):
             raise ValueError('Live mode requires NOCTV_USER and NOCTV_PASSWORD (at least 16 characters)')
         self.collector = Collector(self.config)
+        self.diagnostics = Diagnostics(self.config)
         if start:
             self.collector.start()
 
@@ -41,7 +43,24 @@ class Application:
         code, mime, body, extra = '200 OK', 'application/json; charset=utf-8', b'', []
         path = env.get('PATH_INFO', '/')
         method = env.get('REQUEST_METHOD', 'GET')
-        if method not in ('GET', 'HEAD'):
+        if path == '/api/v1/diagnostics/run' and method == 'POST':
+            if not self.authorized(env):
+                code, body = '401 Unauthorized', b'{"error":"authentication_required"}'
+                extra.append(('WWW-Authenticate', 'Basic realm="NOCtv", charset="UTF-8"'))
+            elif env.get('HTTP_X_NOCTV_REQUEST') != 'diagnostic' or env.get('CONTENT_TYPE', '').split(';')[0] != 'application/json':
+                code, body = '403 Forbidden', b'{"error":"Use the NOCtv diagnostic form."}'
+            else:
+                try:
+                    length = int(env.get('CONTENT_LENGTH', '0'))
+                    if not 0 < length <= 1024:
+                        raise ValueError('invalid length')
+                    request = json.loads(env['wsgi.input'].read(length))
+                    status, result = self.diagnostics.run(request)
+                    labels = {200: 'OK', 400: 'Bad Request', 403: 'Forbidden', 429: 'Too Many Requests', 503: 'Service Unavailable', 504: 'Gateway Timeout'}
+                    code, body = f'{status} {labels[status]}', json.dumps(result).encode()
+                except (ValueError, UnicodeError):
+                    code, body = '400 Bad Request', b'{"error":"Invalid diagnostic request."}'
+        elif method not in ('GET', 'HEAD'):
             code, body = '405 Method Not Allowed', b'{"error":"read_only"}'
             extra.append(('Allow', 'GET, HEAD'))
         elif path == '/healthz':
@@ -53,6 +72,8 @@ class Application:
             body = json.dumps({**public(self.config), 'brands': catalog()}).encode()
         elif path == '/api/v1/snapshot':
             body = json.dumps(self.collector.snapshot(), allow_nan=False).encode()
+        elif path == '/api/v1/diagnostics':
+            body = json.dumps(self.diagnostics.status()).encode()
         else:
             target = (ROOT / 'web' / ('index.html' if path == '/' else path.lstrip('/'))).resolve()
             if not target.is_relative_to(ROOT / 'web') or not target.is_file() or target.suffix not in ('.html', '.css', '.js', '.svg', '.woff2', '.txt'):

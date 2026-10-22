@@ -9,7 +9,16 @@
   <a class="skip" href="#main">Skip to monitoring</a>
   <header class="topbar"><a class="brand" href="#connections"><img src="/icon.svg" alt="" width="30" height="30">NOC<span>tv</span></a><nav aria-label="Monitoring views" id="nav"></nav><span id="mode" class="badge">Connecting</span></header>
   <main id="main" tabindex="-1">
-    <section class="heading"><div><h1 id="title">Connections</h1><p id="subtitle">A shared view of your network</p></div><div class="controls"><span id="freshness" role="status">Connecting…</span><label class="sr" for="site-filter">Filter by site</label><select id="site-filter"><option value="">All sites</option></select><button id="motion" aria-pressed="true">Motion on</button><button id="rotate" aria-pressed="false">Start TV loop</button><button id="fullscreen" aria-label="Toggle fullscreen">⛶</button></div></section>
+    <section class="heading"><div><h1 id="title">Connections</h1><p id="subtitle">A shared view of your network</p></div><div class="controls" aria-label="NOC controls">
+      <button id="tools-open" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 5a6 6 0 0 0-7 7L2 17a3 3 0 0 0 5 5l5-5a6 6 0 0 0 7-7l-4 4-4-4 4-4Z"/></svg>Tools</button>
+      <button id="sound" aria-pressed="false" title="Enable a sound for new critical alerts in this browser session">Sound OFF</button>
+      <button id="notification-bell" data-action="alerts" aria-label="Open current notifications" aria-haspopup="dialog"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 10a6 6 0 0 1 12 0v5l2 3H4l2-3Zm4 11h4M12 2v2"/></svg><span id="notification-count" hidden>0</span></button>
+      <button id="freshness" title="Refresh the displayed snapshot; source polling intervals are unchanged"><i aria-hidden="true"></i><span>Connecting…</span></button>
+      <label class="sr" for="tv-profile">TV display profile</label><select id="tv-profile"><option value="auto">Automatic</option><option value="1080p">TV 1080p</option><option value="4k">TV 4K</option></select>
+      <span id="updated" role="status">Updated —</span>
+      <label class="sr" for="rotate-seconds">Base seconds per view; Connections keeps its configured longer duration</label><input id="rotate-seconds" type="number" min="5" max="600" step="1" value="30">
+      <button id="rotate" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7a9 9 0 1 0 1 9M20 2v6h-6"/></svg><span>Auto paused</span></button>
+    </div></section>
     <div id="error" role="alert" hidden></div>
     <section id="stats" class="stats" aria-label="Current network summary"></section>
     <section id="stage" aria-label="Monitoring content"></section>
@@ -17,6 +26,11 @@
   </main>
   <footer class="ticker" aria-label="Current alerts"><button id="alert-summary" data-action="alerts">No alerts</button><div class="ticker-content"><strong id="ticker-headline"></strong><div class="ticker-window"><div id="ticker-track"></div></div></div><button id="ticker-pause" aria-label="Pause alert scrolling" aria-pressed="false">Ⅱ</button></footer>
   <dialog id="details" aria-labelledby="dialog-title"><div class="dialog-heading"><div><p id="dialog-eyebrow"></p><h2 id="dialog-title"></h2></div><button id="close-dialog">Close ×</button></div><div id="dialog-body"></div></dialog>
+  <dialog id="tools-dialog" aria-labelledby="tools-title"><div class="dialog-heading"><div><p>Display and network diagnostics</p><h2 id="tools-title">Tools</h2></div><button id="tools-close">Close ×</button></div><div class="tools-body">
+    <section class="display-tools"><label for="site-filter">Site</label><select id="site-filter"><option value="">All sites</option></select><button id="motion" aria-pressed="true">Motion on</button><button id="fullscreen" aria-label="Toggle fullscreen">⛶ Fullscreen</button></section>
+    <fieldset class="view-settings"><legend>Visible screens</legend><p class="note">Choose the screens shown in the menu and TV loop on this browser. Collection and alerts continue for hidden screens.</p><div id="visible-views"></div><p id="views-status" class="note" role="status">Keep at least one screen visible.</p><button id="views-reset" type="button">Restore installation defaults</button></fieldset>
+    <section><h3>Network diagnostics</h3><p id="diagnostic-status" class="note">Loading available tools…</p><form id="diagnostic-form"><label>Tool<select id="diagnostic-tool" required></select></label><label>Target IP<input id="diagnostic-target" placeholder="192.0.2.10" maxlength="45" required spellcheck="false" autocomplete="off"></label><button id="diagnostic-run" type="submit" disabled>Run</button></form><pre id="diagnostic-output" tabindex="0" aria-live="polite">Select a tool and a target IP.</pre><p class="note">Runs from the NOCtv server/container, not from this browser. Live use requires permitted networks in the server configuration.</p></section>
+  </div></dialog>
   <script src="/app.js" defer></script>
 </body>
 </html>

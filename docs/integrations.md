@@ -1,10 +1,13 @@
 # Integration coverage
 
-NOCtv consumes monitoring data. It does not implement every manufacturer's SNMP
-MIB, replace a poller or certify every device with a recognized logo.
+NOCtv consumes monitoring data and optionally runs explicitly configured service
+checks. It does not implement every manufacturer's SNMP MIB, replace an SNMP
+poller or certify every device with a recognized logo.
 
 | Connector | Tested contract | Inventory | Device availability | Interfaces | Topology | Additional data |
 | --- | --- | --- | --- | --- | --- | --- |
+| Native probes | Local HTTP/TCP and synthetic DNS/ICMP/TLS tests | Configured targets | Check result | Not applicable | Not applicable | HTTP codes/keyword, TLS expiry, response time |
+| Docker | Engine API 1.45 fixtures | Dynamic or expected names | Runtime and healthcheck | Not implemented | Not implemented | Restarts; optional CPU/memory |
 | Demo | Synthetic deterministic source | Yes | Simulated | Simulated | Simulated | Sample CPU, memory, toner, clients |
 | LibreNMS | API v0 | Yes, dynamic | Upstream device status | State, speed, RX/TX | LLDP/CDP records | Latency and uptime |
 | Zabbix | API 7.0 | Yes, dynamic | Fresh ICMP item only | Explicit item mappings | Not implemented | Exact/default and configured metric keys |
@@ -16,11 +19,12 @@ MIB, replace a poller or certify every device with a recognized logo.
 | Check Point | Management API R80+ | Managed inventory | Not established | Not implemented | Not implemented | Gateway identity/address |
 | Sophos Central | Firewall API v1 | Tenant inventory | Cloud-management connection only | Not implemented | Not implemented | Model, identity |
 
-All live connectors in the community release are **synthetic-fixture tested**.
+API connectors use **synthetic fixtures**; native HTTP/TCP checks also use local test endpoints.
 No production credentials or private inventory were used to validate this package.
 Firmware-specific payloads and permissions require a controlled installation test.
 
-[Prometheus](prometheus.md) and [NetBox](netbox.md) have separate setup examples.
+[Native Services / Docker](services.md) and [portable diagnostics](diagnostics.md)
+have separate setup and permission guides. [Prometheus](prometheus.md) and [NetBox](netbox.md) have separate setup examples.
 Uptime Kuma can feed Prometheus using its documented metrics export; this is not
 a direct Kuma connector. See [integration research and choices](integration-research.md).
 

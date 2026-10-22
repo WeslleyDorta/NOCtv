@@ -96,3 +96,7 @@ installation. Map `latency_ms` to `monitor_response_time{job="uptime"}` with sca
 1 only after verifying the exporter's unit. Renaming an identity changes the
 NOCtv device ID. Additional monitor states beyond 0/1 stay unknown. This adapter
 does not connect to Kuma's Socket.IO API or parse its `/metrics` endpoint.
+
+To show Kuma/Blackbox checks in **Services**, set `"type": "service"` in the
+connector's `devices` overrides for each monitor identity. Unmapped identities
+keep their existing category. Screen visibility does not change the query scope.

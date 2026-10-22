@@ -64,7 +64,7 @@ class CollectorTests(unittest.TestCase):
     def test_demo_contract_and_required_port_policy(self):
         snapshot = self.collector.snapshot()
         validate(snapshot)
-        self.assertEqual(len(snapshot['devices']), 30)
+        self.assertEqual(len(snapshot['devices']), 38)
         self.assertGreater(len(snapshot['links']), 0)
         self.assertTrue(any(a['severity'] == 'critical' for a in snapshot['alerts']))
         self.assertEqual([a['text'] for a in snapshot['alerts'] if 'port DOWN' in a['text']], ['SWITCH-0108 · Gi16 required port DOWN'])
@@ -93,7 +93,7 @@ class CollectorTests(unittest.TestCase):
         with patch('noctv.collector.Demo.collect', side_effect=RuntimeError('secret upstream response')):
             self.collector.poll(self.collector.sources[0])
         snapshot = self.collector.snapshot()
-        self.assertEqual(len(snapshot['devices']), 30)
+        self.assertEqual(len(snapshot['devices']), 38)
         self.assertTrue(all(d['state'] == 'unknown' for d in snapshot['devices']))
         self.assertNotIn('secret upstream', json.dumps(snapshot))
 

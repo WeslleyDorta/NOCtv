@@ -7,7 +7,9 @@ files and commands; no separate installer or AI runtime is needed.
 ## Requirements
 
 - Docker Engine and Docker Compose 2.24+; or Python 3.12+ for a local preview.
-- Existing monitoring systems for live mode. NOCtv does not install them.
+- A supported source API or explicitly configured native service checks for live mode.
+  NOCtv does not install LibreNMS/Zabbix. Kali is not required; the image bundles
+  [optional network tools](diagnostics.md).
 - Read-only credentials and trusted TLS certificates for the chosen APIs.
 
 Run `docker compose up --build -d` for the demo. Docker builds one image, runs as
@@ -71,7 +73,7 @@ best with a small number of sites; large layouts need a narrower scope.
 LibreNMS `site_map` maps the upstream location string to a site ID. `devices`
 uses native device IDs, e.g. `"1"`. Overrides can set `name`, `site`, `type`, `root`,
 `web_url`, `brand`, and `required_ports`. Available types:
-`switch`, `router`, `firewall`, `server`, `printer`, `wireless`, `device`.
+`switch`, `router`, `firewall`, `server`, `printer`, `wireless`, `device`, `service`, `container`.
 Device web links are opt-in and accept only HTTP(S), without embedded credentials.
 
 LibreNMS's generic `network` type initially maps to switch. Override routers or
@@ -131,6 +133,17 @@ without TLS does not encrypt credentials. Bind only to interfaces you intend to
 expose, restrict firewall access, and do not place operational snapshots on a
 public portfolio endpoint. Keep portfolio demonstrations in demo mode.
 
-The service has no configuration editor, shell commands, write APIs, device
-scanning, anonymous live API, or public metrics endpoint. Back up your private
+The service has no server configuration editor, arbitrary shell commands, device
+control APIs, anonymous live API, or public metrics endpoint. Optional fixed
+[diagnostic commands](diagnostics.md) require explicitly allowed networks. Back up your private
 configuration separately; the repository is not an operational backup.
+
+## TV controls and optional screens
+
+Use **Tools → Visible screens** to hide screens from this browser's menu/rotation;
+collection and alerts are unaffected. `display.views` sets installation defaults.
+See [Services and Containers](services.md) for IDs and examples. Profile, base
+rotation duration and rotation state persist in the browser. Connections retains
+its configured longer duration. Open dialogs pause the loop. Sound is opt-in per
+browser session and plays only for newly observed critical alerts; browser audio
+permissions still apply. Refresh reloads the shared snapshot, not upstream polls.

@@ -63,4 +63,19 @@ class Demo:
                     'state': 'attention' if index == 2 else 'up', 'latency_ms': 12 + index * 8,
                     'loss_percent': .8 if index == 2 else 0, 'traffic_bps': (5 + index + math.sin(tick)) * 1e6,
                     'observed_at': stamp, 'evidence': 'DEMO'})
+        for i, kind in enumerate(('HTTPS', 'HTTPS', 'TCP', 'DNS', 'PING')):
+            state = 'attention' if i == 1 else 'down' if i == 2 and tick % 12 < 6 else 'up'
+            metrics = {'latency_ms': round(24 + i * 4 + math.sin(tick), 1)}
+            if kind == 'HTTPS':
+                metrics.update(http_status_code=200, certificate_days=8 if i == 1 else 85)
+            devices.append({'id': f'demo:service:{i}', 'name': f'Demo {kind} check {i + 1}',
+                'type': 'service', 'site': sites[0]['id'], 'category': kind, 'model': kind + ' check',
+                'ip': 'service.example.com', 'state': state, 'observed_at': stamp, 'metrics': metrics, 'ports': [],
+                'services': [{'name': 'TLS certificate expires soon' if i == 1 else 'Connection refused' if state == 'down' else 'Check passed', 'state': state}]})
+        for i, health in enumerate(('healthy', 'unhealthy', 'not configured')):
+            devices.append({'id': f'demo:container:{i}', 'name': ('demo-web', 'demo-worker', 'demo-cache')[i],
+                'type': 'container', 'site': sites[-1]['id'], 'category': 'Demo Docker host', 'model': 'Docker container',
+                'state': 'down' if health == 'unhealthy' else 'up', 'observed_at': stamp, 'ports': [],
+                'runtime_state': 'running', 'health_state': health,
+                'metrics': {'restart_count': i, 'cpu_percent': round(3 + i + math.sin(tick), 1), 'memory_percent': 25 + i * 12}})
         return {'devices': devices, 'links': links}

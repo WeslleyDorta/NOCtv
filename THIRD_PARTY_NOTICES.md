@@ -20,3 +20,10 @@ NOCtv source code is MIT licensed. Dependencies and assets retain their own lice
 No manufacturer faceplates, private screenshots, device-export images or other
 operational media are distributed. Generic device/interface drawings are part
 of the NOCtv source.
+
+The Docker image also installs distribution packages `iputils-ping`, `traceroute`,
+`dnsutils` and `nmap` with their dependencies. These retain their upstream licenses,
+including Nmap's license; they are not relicensed under NOCtv's MIT license.
+Installed copyright/license notices remain under `/usr/share/doc/` in the image.
+Consult those package notices and [Nmap licensing](https://nmap.org/book/man-legal.html)
+before redistributing an image under different commercial terms.

@@ -1,0 +1,14 @@
+{
+  "mode": "live", "timezone": "UTC", "title": "NOCtv",
+  "display": {"views": ["connections", "services"]},
+  "sites": [{"id": "lab", "name": "Example site", "x": 50, "y": 50}],
+  "connectors": [{
+    "id": "services", "type": "probes", "interval_seconds": 60, "max_age_seconds": 180,
+    "checks": [
+      {"id": "website", "name": "Public website", "kind": "http", "url_env": "WEBSITE_CHECK_URL", "site": "lab", "expected_status": [200], "certificate_warning_days": 21},
+      {"id": "tcp", "name": "Application TCP", "kind": "tcp", "host": "app.example.com", "port": 443, "site": "lab"},
+      {"id": "dns", "name": "DNS record", "kind": "dns", "host": "example.com", "record_type": "A", "site": "lab"},
+      {"id": "ping", "name": "Example router", "kind": "ping", "host": "192.0.2.1", "site": "lab"}
+    ]
+  }]
+}

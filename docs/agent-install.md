@@ -44,8 +44,8 @@ Ask only for choices not already known:
   and let the operator supply coordinates locally; do not infer locations from IPs.
 
 Read [setup](setup.md) and [coverage](integrations.md). If no monitoring system
-exists, explain that the demo works immediately but live mode needs an existing
-source. Do not build a new monitoring infrastructure as an implicit install step.
+exists, explain that the demo works immediately and live mode can use explicitly
+configured [service checks](services.md) without another monitoring product. Do not build a new monitoring infrastructure as an implicit install step.
 
 ## 2. Verify the demo
 
@@ -56,13 +56,19 @@ docker compose config --quiet
 docker compose up --build -d
 ```
 
-Open `http://localhost:8080`. Confirm the simulated-data badge, seven views,
+Open `http://localhost:8080`. Confirm the simulated-data badge, nine views,
 switch/port interaction and TV loop. Stop with `docker compose down` when needed.
 On an existing live installation, do not replace its configuration to run a demo;
 use a separate checkout/project and an unused port, or skip the demo.
 
 Python 3.12+ can run a local preview with `python3 -m noctv serve --port 8080`.
 The preview is not the production server. Node is needed only for browser tests.
+
+Verify Tools → Visible screens: hide an unused view, reload, and confirm it stays
+out of navigation and rotation while alerts remain active. Use the Docker image's
+bundled tools; do not assume Kali. For native installs, identify required binaries
+and obtain authorization before installing packages. Consult [diagnostics](diagnostics.md)
+and [Services / Docker](services.md); do not mount an unrestricted Docker socket.
 
 ## 3. Prepare private configuration
 

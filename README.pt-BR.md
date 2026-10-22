@@ -2,7 +2,7 @@
 
 Painel de monitoramento de rede para TVs e operações de NOC. Reúne dados do
 LibreNMS, Zabbix, Prometheus, NetBox e APIs de firewalls em telas de conexões, switches, portas,
-servidores, impressoras, Wi-Fi e dispositivos.
+servidores, impressoras, Wi-Fi, dispositivos, Serviços e Containers.
 
 [English](README.md) · [Instalação](docs/setup.md) · [Integrações](docs/integrations.md)
 
@@ -34,6 +34,24 @@ configuração, diagnóstico e recuperação. `AGENTS.md` concentra as instruç�
 os arquivos automaticamente, peça a leitura explicitamente. Ele deve responder
 no seu idioma e precisa de acesso à máquina de instalação para executar comandos.
 O NOCtv funciona depois sem agente, assinatura ou chave de IA.
+
+## Serviços, containers e telas opcionais
+
+Em **Tools → Visible screens**, escolha as telas que aparecem no menu e no
+rodízio da TV. A escolha fica salva nesse navegador. Telas ocultas continuam
+coletando dados e seus alertas críticos permanecem na barra. O arquivo de
+configuração também define as telas disponíveis e sua ordem em `display.views`.
+
+A tela **Services** reúne checks HTTP/HTTPS, TCP, DNS e ping; HTTPS mostra validade
+do certificado. **Containers** mostra estado de execução, healthcheck, reinícios
+e métricas opcionais de CPU/memória via API Docker HTTPS com acesso de leitura.
+Veja [exemplos e limites](docs/services.md). Isso não implementa todas as funções
+do Uptime Kuma; também é possível aproveitar os dados dele via Prometheus.
+
+Kali não é necessário: a imagem Docker inclui ping, traceroute, DNS e Nmap.
+Os [diagnósticos](docs/diagnostics.md) são opcionais, exigem redes autorizadas
+na configuração e ficam desligados no modo real por padrão. Na demonstração,
+todos os resultados são simulados.
 
 ## Adaptar
 

@@ -2,9 +2,18 @@
 
 ## Unreleased
 
+- Add Services and Containers screens; hide/show screens per browser, excluding
+  hidden screens from TV rotation while retaining collection and global alerts.
+- Add explicit HTTP/HTTPS, TCP, DNS and ping checks plus read-only Docker runtime,
+  healthcheck, restart and optional resource collection. Expand demo to 38 items.
+- Restore the toolbar: Tools, opt-in sound, notifications, manual refresh,
+  TV profile, update time and persistent base rotation duration.
+- Bundle portable diagnostic tools in Docker, disabled by default in live mode,
+  with explicit CIDR targets and simulated demo results. Kali is not required.
+
 - Restore the compact NOC display: three-column connections, large geographic map,
   branch topology, two port panels, host resources, printer supplies, Wi-Fi readings
-  and grouped device cards. Keep seven views and the shared navigation/ticker.
+  and grouped device cards. Keep the shared navigation/ticker.
 - Bundle Brazil state boundaries and highlight only regions containing configured sites.
 - Show per-view summaries and collected session history; preserve unknown values.
 - Expand the offline synthetic scenario to 30 devices, including a required-port incident.
