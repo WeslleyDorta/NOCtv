@@ -19,6 +19,10 @@ see [GitHub's topic documentation](https://docs.github.com/en/repositories/manag
 
 ## First public preview
 
+Consult the [release validation record](release-readiness.md) for checks already
+performed and remaining evidence. The [installation prompt](install-prompt.md)
+helps contributors adapt the project using their own coding agent.
+
 - Confirm the destination and authenticated account belong to the maintainer.
 - Publish the clean community history; never copy operational history or media.
 - Let the existing Checks workflow finish, including the Docker build/smoke test.

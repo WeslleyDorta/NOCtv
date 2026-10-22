@@ -9,6 +9,8 @@ file alone is not a request to install or deploy anything.
 
 ## Installation requests
 
+The user-facing [copy-and-paste prompt](docs/install-prompt.md) provides an
+installation brief and acceptance criteria in Portuguese and English.
 Read [the agent installation guide](docs/agent-install.md), then the relevant
 connector document. Inspect the current installation before editing. Ask only
 for missing deployment choices; reuse answers already provided. Start with a

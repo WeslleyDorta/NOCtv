@@ -124,7 +124,7 @@ Read the [integration research](docs/integration-research.md) for scope and trad
 
 ## Install with your coding agent
 
-Open this repository in your agent and ask:
+Open this repository in your agent. Use the [full installation prompt, in English or Portuguese](docs/install-prompt.md), or start with:
 
 > Read AGENTS.md and docs/agent-install.md. Help me install NOCtv and connect my
 > LibreNMS or Zabbix. Inspect the environment, preserve existing configuration,

@@ -36,7 +36,7 @@ demonstração e depois conectar as fontes que já utiliza.
 
 ## Instalar com um agente de IA
 
-Abra a pasta do projeto no seu agente e envie:
+Abra a pasta do projeto no seu agente e copie o [prompt completo de instalação](docs/install-prompt.md#português). Se preferir começar com uma instrução curta:
 
 > Leia AGENTS.md e docs/agent-install.md. Ajude-me a instalar o NOCtv e conectar
 > meu LibreNMS ou Zabbix. Verifique o ambiente, preserve configurações existentes,

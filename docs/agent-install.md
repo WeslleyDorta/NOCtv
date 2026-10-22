@@ -5,7 +5,9 @@ files and run terminal commands. Review commands through your tool's normal
 permission controls. A chat with only a GitHub link can explain the installation,
 but cannot deploy to your machine without access to it.
 
-Copy this request into your agent:
+For a complete environment-adaptation brief, copy the [installation prompt](install-prompt.md).
+It includes source selection, local configuration, TV preferences and verification.
+The short version is:
 
 > Read AGENTS.md and docs/agent-install.md. Help me install NOCtv on this machine.
 > Inspect the environment first, ask which monitoring source I want to connect,
@@ -80,7 +82,9 @@ blindly copy examples over a working installation.
 For a new installation, create `.env` from `.env.example`. Create
 `config/local.json` from `config/live.example.json` for LibreNMS, or
 `config/zabbix.example.json` for Zabbix. Prometheus and NetBox have their own
-`config/prometheus.example.json` and `config/netbox.example.json` examples.
+`config/prometheus.example.json` and `config/netbox.example.json` examples. Native
+checks use `config/services.example.json`; Docker uses `config/docker.example.json`.
+Select only the sources the operator intends to enable, with unique connector IDs.
 Set `NOCTV_CONFIG_FILE=./config/local.json`.
 Have the operator fill credentials in a local editor or secret store, without
 pasting values into chat or shell arguments. Live mode also requires `NOCTV_USER`
@@ -91,6 +95,9 @@ and a unique `NOCTV_PASSWORD` of at least 16 characters.
 | LibreNMS | `LIBRENMS_URL` ending in `/api/v0/`, `LIBRENMS_TOKEN` | Map actual location strings to site IDs; adjust category/root/required-port overrides |
 | Prometheus | `PROMETHEUS_URL`, optional token with `token_env` | Follow [Prometheus guide](prometheus.md); map explicit status/metric selectors and identity labels |
 | NetBox | `NETBOX_URL`, `NETBOX_TOKEN` (v2) | Follow [NetBox guide](netbox.md); map sites/categories; inventory alone has unknown operational state |
+| Native probes | `WEBSITE_CHECK_URL` or check-specific `url_env`; optional HTTPS token | Follow [Services](services.md); use only explicitly authorized HTTP/TCP/DNS/ICMP targets |
+| Docker | `DOCKER_API_URL`, optional proxy token or mounted mTLS files | Follow [Docker](services.md#docker-engine); read-only HTTPS endpoint, expected names/scope, optional stats |
+| Firewalls | Variables from the chosen [firewall](firewalls.md) or [Forcepoint](setup.md#forcepoint-smc) guide | Confirm API version, permitted domain/inventory and documented operational versus management coverage |
 | Zabbix | `ZABBIX_URL` ending in `api_jsonrpc.php`, `ZABBIX_TOKEN` | Read [Zabbix guide](zabbix.md); use the operator's host IDs and exact template item keys |
 
 Use dedicated read-only accounts. Zabbix requires access to the desired hosts
@@ -98,7 +105,7 @@ and `host.get`/`item.get`. Replace or remove the sample device IDs and all
 `example.*` item mappings; they are not ready-to-use templates. Do not invent keys
 to make CPU, toner, clients or ports appear. Report absent metrics honestly.
 
-For both sources, combine their connector objects in one `connectors` list with
+For multiple sources, combine their connector objects in one `connectors` list with
 unique IDs and a shared list of sites. Avoid duplicate devices: there is no
 automatic cross-source merge. Inventory additions are dynamic, but classification
 and site mapping may need overrides. Zabbix topology is not implemented.
@@ -152,7 +159,10 @@ Wait for the first collection, then check all three layers:
    unless the operator expects zero visible devices.
 3. **Data:** compare a representative device and, where supported, a port/metric
    against the upstream UI. Verify its unit, timestamp, category and site. Confirm
-   a later collection updates the observation; never turn off equipment to test.
+   a later collection updates the observation; observe two collection cycles. Never
+   turn off equipment to test. For native probes, compare the check result with a
+   known local test service. For Docker, compare runtime and healthcheck separately;
+   a running container without a healthcheck does not establish application health.
 
 Prefer the authenticated local UI. If inspecting `/api/v1/snapshot` in a script,
 read credentials from the local process environment and print only a sanitized
@@ -184,3 +194,7 @@ backup, and recreate only its service. Do not remove volumes, reset Git, prune
 Docker or overwrite an upstream system as part of rollback. Preserve local files
 and review changes before future upgrades. Commit only generic documentation or
 code changes when the user requested repository work.
+
+Use the [handover table](install-prompt.md#what-a-completed-installation-should-report)
+to distinguish verified, pending and not applicable checks. Testing these prompts
+against a real operator environment is separate from application fixture tests.
