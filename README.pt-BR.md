@@ -1,10 +1,12 @@
 # NOCtv
 
+**Sua rede em uma TV: conexões, topologia e incidentes sempre à vista.**
+
 Painel de monitoramento de rede para TVs e operações de NOC. Reúne dados do
 LibreNMS, Zabbix, Prometheus, NetBox e APIs de firewalls em telas de conexões, switches, portas,
 servidores, impressoras, Wi-Fi, dispositivos, Serviços e Containers.
 
-[English](README.md) · [Instalação](docs/setup.md) · [Integrações](docs/integrations.md)
+[Executar demonstração](#executar-a-demonstração) · [Conhecer as telas](docs/tour.md) · [Integrações](docs/integrations.md) · [English](README.md)
 
 ![Demonstração com dados fictícios](docs/images/connections.png)
 
@@ -19,6 +21,18 @@ docker compose up --build -d
 Acesse **http://localhost:8080**. Requer Docker e Compose 2.24 ou superior.
 A demonstração funciona sem credenciais e sem consultar equipamentos reais.
 Como alternativa local, use Python 3.12+: `python3 -m noctv serve`.
+
+## Feito para acompanhar a operação
+
+- Mapa de unidades e ramificações de switches, com portas interativas.
+- Incidentes primeiro e alertas críticos na barra inferior.
+- Rodízio automático e escolha das telas usadas por cada TV.
+- Coletas antigas aparecem como desconhecidas, preservando a confiança no painel.
+
+![Topologia com equipamentos fictícios](docs/images/switches.png)
+
+Veja a [galeria das nove telas](docs/tour.md). Você pode começar apenas com a
+demonstração e depois conectar as fontes que já utiliza.
 
 ## Instalar com um agente de IA
 
@@ -94,6 +108,16 @@ de compatibilidade.
 O modo real exige autenticação. Para acesso remoto, use HTTPS e controle de acesso;
 o Compose publica apenas em localhost por padrão. Não publique o inventário da
 sua organização em uma demonstração aberta.
+
+## Participar
+
+Teste no seu laboratório, relate a versão da ferramenta e os campos que funcionaram,
+ou sugira uma integração com a documentação oficial da API. Também são bem-vindas
+melhorias de instalação, traduções e exemplos fictícios.
+
+[Relatar problema ou sugerir integração](https://github.com/WeslleyDorta/NOCtv/issues/new/choose).
+Pode escrever em português ou inglês. Remova nomes, endereços, credenciais e alertas
+reais antes de compartilhar capturas ou respostas de API.
 
 Criado por **[Weslley Dorta](https://github.com/WeslleyDorta)**. Código sob licença
 [MIT](LICENSE); fontes e marcas têm licenças próprias.

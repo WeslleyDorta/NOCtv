@@ -1,12 +1,14 @@
 # NOCtv
 
-**Your network, ready for the big screen.**
+**A network operations dashboard built for the big screen.**
 
-A self-hosted network operations dashboard with site connections, switch topology,
-interactive interfaces and a TV rotation mode. Bring telemetry from LibreNMS,
-Zabbix or supported firewall APIs; configure your own sites and equipment.
+See site connectivity, follow switch links and inspect ports from one TV dashboard.
+NOCtv brings LibreNMS, Zabbix and Prometheus telemetry together with service checks
+and Docker health, using your own infrastructure.
 
-[Português](README.pt-BR.md) · [Setup](docs/setup.md) · [Integrations](docs/integrations.md) · [Create a connector](docs/connector-contract.md)
+**Self-hosted · Nine configurable screens · Synthetic demo · MIT source code**
+
+[Run the demo](#try-it) · [Screen tour](docs/tour.md) · [Connect your tools](#connect-your-tools) · [Português](README.pt-BR.md)
 
 ![NOCtv demo: site connections](docs/images/connections.png)
 
@@ -36,19 +38,18 @@ python3 -m noctv serve
 The Python preview server is for local evaluation. Docker uses Gunicorn. See
 [deployment](docs/setup.md) before exposing a live installation to other users.
 
-## Install with your coding agent
+## Built for a NOC wall
 
-Open this repository in your agent and ask:
+- **Keep the network in view.** Country/world maps show reported site links;
+  switch branches lead to interface states and discovered neighbors.
+- **See what needs attention.** Incidents sort first, required ports have an
+  explicit policy, and the bottom ticker keeps critical events visible.
+- **Leave the TV running.** Rotate through selected screens, spend longer on
+  Connections and hide views you do not use. Dialogs pause the loop.
+- **Know when data is missing.** Each source has its own collection clock;
+  stale readings become unknown instead of remaining green.
 
-> Read AGENTS.md and docs/agent-install.md. Help me install NOCtv and connect my
-> LibreNMS or Zabbix. Inspect the environment, preserve existing configuration,
-> guide me to enter credentials locally, and verify actual telemetry.
-
-The [installation guide](docs/agent-install.md) covers demo/live setup,
-configuration, troubleshooting and recovery. `AGENTS.md` is the shared entry
-point; `CLAUDE.md` imports it for Claude Code. With other tools, explicitly ask
-the agent to read the files if they are not loaded automatically. The agent needs
-access to the installation machine; NOCtv itself requires no AI service or key.
+![Switch topology with interface states, using fictional devices](docs/images/switches.png)
 
 ## What is included
 
@@ -66,13 +67,26 @@ access to the installation machine; NOCtv itself requires no AI service or key.
 - Manufacturer recognition for 25 brands, with 13 bundled, attributed logos.
 - Site, category, device-name, URL, root-switch and monitoring interval overrides.
 
-![NOCtv demo: interface inspection](docs/images/port-detail.png)
+## Take a look
 
-More synthetic views: [switches](docs/images/switches.png) ·
-[ports](docs/images/ports.png) · [servers](docs/images/servers.png) ·
-[printers](docs/images/printers.png) · [Wi-Fi](docs/images/wireless.png) ·
-[devices](docs/images/devices.png) · [services](docs/images/services.png) ·
-[containers](docs/images/containers.png) · [site details](docs/images/site-detail.png).
+| Inspect a switch port | Monitor services |
+| --- | --- |
+| [![Interface detail with discovered neighbor](docs/images/port-detail.png)](docs/images/port-detail.png) | [![HTTP, TLS, TCP and DNS check cards](docs/images/services.png)](docs/images/services.png) |
+| Select a port to see its state and reported neighbor. | See check results, response time and TLS expiry. |
+
+[Browse all nine screens and TV controls](docs/tour.md). Every screenshot uses
+fictional data; no company inventory is needed to try the project.
+
+## Connect your tools
+
+| Your starting point | Start here |
+| --- | --- |
+| I already use LibreNMS | [Devices, interfaces and topology](docs/setup.md) |
+| I already use Zabbix | [Host and item mappings](docs/zabbix.md) |
+| I use Prometheus or Uptime Kuma | [Status queries and metrics](docs/prometheus.md) |
+| I want website or service checks | [HTTP/HTTPS, TCP, DNS and ping](docs/services.md#native-service-checks) |
+| I want Docker health | [Container runtime and healthchecks](docs/services.md#docker-engine) |
+| I want to try the interface first | [Run the synthetic demo](#try-it) |
 
 ## Integrations at a glance
 
@@ -107,6 +121,34 @@ Detailed examples: [LibreNMS and Forcepoint](docs/setup.md), [Zabbix](docs/zabbi
 [NetBox](docs/netbox.md), [Services / Docker / visible screens](docs/services.md),
 [portable diagnostics](docs/diagnostics.md), [brand recognition](docs/brands.md).
 Read the [integration research](docs/integration-research.md) for scope and trade-offs.
+
+## Install with your coding agent
+
+Open this repository in your agent and ask:
+
+> Read AGENTS.md and docs/agent-install.md. Help me install NOCtv and connect my
+> LibreNMS or Zabbix. Inspect the environment, preserve existing configuration,
+> guide me to enter credentials locally, and verify actual telemetry.
+
+The [installation guide](docs/agent-install.md) covers demo/live setup,
+configuration, troubleshooting and recovery. `AGENTS.md` is the shared entry
+point; `CLAUDE.md` imports it for Claude Code. With other tools, explicitly ask
+the agent to read the files if they are not loaded automatically. The agent needs
+access to the installation machine; NOCtv itself requires no AI service or key.
+
+## Help shape the community edition
+
+Useful contributions start with a real monitoring need:
+
+- Try a connector and report its product/API version, what worked and what was missing.
+- Suggest an integration with a link to the official read API and the metrics you need.
+- Improve installation instructions, translations or synthetic test fixtures.
+- Share a screenshot of your layout after removing private names, addresses and alerts.
+
+[Report a problem or request an integration](https://github.com/WeslleyDorta/NOCtv/issues/new/choose).
+English and Portuguese reports are welcome. For a suspected security issue, use
+GitHub's private vulnerability reporting when enabled; do not publish exploit
+credentials or private operational data in an issue.
 
 ## Contribute
 

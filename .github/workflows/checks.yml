@@ -23,6 +23,8 @@ jobs:
       - run: python -m noctv check --config config/map-world.example.json
       - run: python -m noctv check --config config/prometheus.example.json
       - run: python -m noctv check --config config/netbox.example.json
+      - run: python -m noctv check --config config/services.example.json
+      - run: python -m noctv check --config config/docker.example.json
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm test
@@ -32,11 +34,11 @@ jobs:
         run: |
           docker run -d --name noctv-test --read-only --tmpfs /tmp:rw,noexec,nosuid,size=32m --cap-drop ALL --security-opt no-new-privileges -p 127.0.0.1:8080:8080 noctv-test
           for i in $(seq 1 30); do
-            if curl --fail http://localhost:8080/api/v1/snapshot > /tmp/snapshot.json && python -c "import json; d=json.load(open('/tmp/snapshot.json')); assert d['mode']=='demo' and len(d['devices']) == 16"; then break; fi
+            if curl --fail http://localhost:8080/api/v1/snapshot > /tmp/snapshot.json && python -c "import json; d=json.load(open('/tmp/snapshot.json')); assert d['mode']=='demo' and len(d['devices']) == 38"; then break; fi
             sleep 1
           done
           curl --fail http://localhost:8080/api/v1/snapshot > /tmp/snapshot.json
-          python -c "import json; d=json.load(open('/tmp/snapshot.json')); assert d['mode']=='demo' and len(d['devices']) == 16"
+          python -c "import json; d=json.load(open('/tmp/snapshot.json')); assert d['mode']=='demo' and len(d['devices']) == 38"
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

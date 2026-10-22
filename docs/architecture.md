@@ -1,14 +1,14 @@
 # NOCtv community architecture
 
-NOCtv is a self-hosted display layer for existing monitoring systems. A fresh
+NOCtv is a self-hosted monitoring display with source adapters and optional native checks. A fresh
 repository contains only reusable source and synthetic examples, with no copied
 operational Git history, configuration, screenshots or collected inventory.
 
 ## First release (0.1)
 
 - Docker Compose demo without credentials or external network dependencies.
-- Seven display views: connections, switches, ports, servers, printers, wireless,
-  and other devices. Site and port dialogs, source freshness, a notification ticker,
+- Nine display views: connections, switches, ports, servers, printers, wireless,
+  other devices, services and containers. Site and port dialogs, source freshness, a notification ticker,
   reduced motion, and automatic screen rotation.
 - JSON configuration for sites, locations, device classification, topology roots,
   collection periods and display limits. No environment-specific constants.
@@ -25,7 +25,8 @@ operational Git history, configuration, screenshots or collected inventory.
 `config.py` validates configuration. `connectors/` returns normalized devices and
 links. `collector.py` schedules sources independently and keeps last-known data
 with explicit source state. `server.py` serves the API and the static interface.
-The interface uses only `/api/v1/config` and `/api/v1/snapshot`.
+The interface uses `/api/v1/config` and `/api/v1/snapshot` for display data,
+plus the optional, separately authorized [diagnostic endpoints](diagnostics.md).
 
 Device IDs are namespaced by source. No automatic cross-source identity merge is
 attempted: configure which source owns a device. Links require evidence from a
@@ -36,10 +37,11 @@ connector; schematic layout must not fabricate network relationships.
 Single-process, in-memory current state, with no history database or high
 availability. Use one Gunicorn worker with threads. Optional metrics appear only
 when provided. Generic interface diagrams are not manufacturer faceplates.
-The project does not install LibreNMS or scan/configure network equipment.
-New vendors should normally enter through LibreNMS; dedicated integrations use
-the connector contract. Zabbix, UniFi, Redfish and hypervisor adapters are future
-contributions, not advertised as implemented integrations.
+The project does not install LibreNMS/Zabbix or configure network equipment.
+Native probes use explicit targets; optional diagnostics use configured permitted
+networks. New vendors can enter through LibreNMS, Zabbix or Prometheus; dedicated
+integrations use the connector contract. UniFi, Redfish and hypervisor-specific
+adapters are not implemented. See the [current matrix](integrations.md).
 
 ## Validation
 
