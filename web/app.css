@@ -40,3 +40,45 @@ body:is([data-page=switches],[data-page=printers],[data-page=wireless],[data-pag
 @media(max-width:600px){#diagnostic-form{flex-direction:column;align-items:stretch}#diagnostic-form label{width:100%}.tools-body{padding-inline:16px}.controls{font-size:11px}.controls #freshness{min-width:140px}}
 
 .view-settings{border:0;padding:0 0 22px;margin:0 0 22px;border-bottom:1px solid var(--line)}.view-settings legend{font-weight:600}#visible-views{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:16px 0}#visible-views label{display:flex;align-items:center;gap:10px;font-size:13px}#visible-views input{accent-color:var(--cyan);width:17px;height:17px}.monitor-card{min-height:250px}.monitor-facts{display:flex;flex-wrap:wrap;gap:14px;margin:17px 0}.monitor-facts small{display:block;margin-bottom:7px}.monitor-facts strong{font:550 16px GeistMono,monospace}.monitor-card .resources{margin-bottom:15px}.monitor-reason{color:var(--muted);font-size:12px;line-height:1.5;min-height:36px;overflow-wrap:anywhere}.monitor-observed{display:block;margin-top:12px}.services-grid,.containers-grid{grid-template-columns:repeat(4,minmax(0,1fr))}@media(max-width:1200px){.services-grid,.containers-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}@media(max-width:800px){.services-grid,.containers-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#visible-views{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:500px){.services-grid,.containers-grid{grid-template-columns:1fr}}
+
+/* Fit the available TV area before reducing detail; full inventory stays accessible. */
+.adaptive-equipment{display:flex;flex-direction:column;gap:12px;min-height:0;flex:1}
+.adaptive-equipment>.servers-grid,.adaptive-equipment>.equipment-grid,.adaptive-equipment>.device-categories{grid-template-columns:repeat(var(--equipment-columns,2),minmax(0,1fr));flex:none;align-items:start}
+.equipment-overflow{display:block;width:100%;min-height:42px;flex-shrink:0;text-align:left;border-left:3px solid var(--state);font-size:13px;color:var(--text);background:#142027}
+.equipment-overflow[data-state=down]{background:#29171d}
+.storage-brief{display:none;padding:10px 14px;font-size:12px;color:var(--muted)}
+@media(min-width:1000px){
+ .adaptive-equipment~.server-history{flex:none;height:130px;min-height:130px}
+ .adaptive-equipment .device-card h3{font-size:17px}
+ .adaptive-equipment .category-grid{grid-template-columns:repeat(auto-fit,minmax(190px,1fr))}
+ .adaptive-equipment[data-density=compact] .storage-panel,.adaptive-equipment[data-density=dense] .storage-panel{display:none}
+ .adaptive-equipment:is([data-density=compact],[data-density=dense]) .storage-brief{display:block}
+ .adaptive-equipment:is([data-density=compact],[data-density=dense]) .device-card:not(.server-card){padding:12px}
+ .adaptive-equipment:is([data-density=compact],[data-density=dense]) .resources{margin:12px 0;gap:10px}
+ .adaptive-equipment:is([data-density=compact],[data-density=dense]) .response-chart svg{height:30px}
+ .adaptive-equipment:is([data-density=compact],[data-density=dense]) .chart-empty{height:40px}
+ .adaptive-equipment:is([data-density=compact],[data-density=dense]) .server-head{padding:12px}
+ .adaptive-equipment:is([data-density=compact],[data-density=dense]) .server-capacity{padding:12px;gap:12px}
+ .adaptive-equipment:is([data-density=compact],[data-density=dense]) .hardware-readings{padding:10px 12px;gap:8px}
+ .adaptive-equipment:is([data-density=compact],[data-density=dense]) .hardware-readings>div:nth-child(n+4){display:none}
+ .adaptive-equipment:is([data-density=compact],[data-density=dense]) .capacity-details{display:none}
+ .adaptive-equipment[data-density=dense] .hardware-readings,.adaptive-equipment[data-density=dense] .response-chart,.adaptive-equipment[data-density=dense] .chart-empty{display:none}
+ .adaptive-equipment[data-density=dense] .monitor-card{min-height:0}
+ .adaptive-equipment[data-density=dense] .monitor-facts{margin:12px 0;gap:10px}
+ .adaptive-equipment[data-density=dense] .monitor-reason{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:0}
+ .adaptive-equipment[data-density=dense] .monitor-observed{margin-top:8px}
+ .adaptive-equipment[data-density=dense] .readings strong{font-size:21px}
+ .adaptive-equipment[data-density=dense] .category-head{margin-bottom:6px}
+ .adaptive-equipment[data-density=dense] .category-grid{gap:8px}
+}
+@media(max-width:999px){
+ .adaptive-equipment{flex:none}
+ .adaptive-equipment>.servers-grid,.adaptive-equipment>.device-categories{grid-template-columns:1fr}
+ .adaptive-equipment>.equipment-grid{grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+}
+.server-history{grid-template-rows:minmax(0,1fr)}
+.server-history svg{min-height:0}
+@media(min-width:1000px){
+ .adaptive-equipment[data-density=dense] .card-state{position:static;display:block;text-align:right;padding-right:30px;margin-bottom:8px}
+ .adaptive-equipment[data-density=dense] .device-card:not(.server-card) .card-open{width:100%}
+}

@@ -36,6 +36,7 @@ Como alternativa local, use Python 3.12+: `python3 -m noctv serve`.
 - Mapa de unidades e ramificações de switches, com portas interativas.
 - Incidentes primeiro e alertas críticos na barra inferior.
 - Rodízio automático e escolha das telas usadas por cada TV.
+- Cards adaptativos: colunas e detalhes se ajustam ao espaço e à quantidade de equipamentos. O excedente aparece em um resumo por estado, com falhas priorizadas.
 - Coletas antigas aparecem como desconhecidas, preservando a confiança no painel.
 
 ![Topologia com equipamentos fictícios](docs/images/switches.png)

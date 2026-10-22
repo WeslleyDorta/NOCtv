@@ -17,9 +17,9 @@ npx playwright install chromium
 npm test
 ```
 
-Browser checks launch an isolated demo on localhost:8766, generate screenshots
+Browser checks launch an isolated demo on localhost:8766 and localhost:8768, generate screenshots
 under ignored `artifacts/`, and make no live source requests. A running instance on
-that test port must be stopped first. The interface has no frontend build step.
+either test port must be stopped first. The interface has no frontend build step.
 
 For logos, document redistribution permission, preserve attribution and trademark
 notices, and reject SVG scripts/external references. A generic icon is preferable

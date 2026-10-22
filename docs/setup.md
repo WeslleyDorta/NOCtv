@@ -147,3 +147,23 @@ rotation duration and rotation state persist in the browser. Connections retains
 its configured longer duration. Open dialogs pause the loop. Sound is opt-in per
 browser session and plays only for newly observed critical alerts; browser audio
 permissions still apply. Refresh reloads the shared snapshot, not upstream polls.
+
+### Automatic equipment layout
+
+Servers, printers, Wi-Fi, devices, services and containers reflow on inventory
+refresh, window resize and TV profile changes. Columns use the actual available
+area. Small inventories keep detailed cards; larger ones use compact cards, then
+a summary layout with identity, state and key measurements. Full server hardware
+and datastore details remain available by opening a card.
+
+The TV stays on one screen, without manual pagination. If readable cards cannot
+all fit, the remaining inventory is counted by state in a visible summary. Click
+**Open inventory** to inspect every device; summary totals still cover the full
+selected scope. DOWN devices come first, followed by attention and unknown states.
+Server storage/memory thresholds and low printer toner also affect this order.
+
+`display.max_cards` is an upper bound, not a fixed column count: default 16,
+configurable from 4 to 48. Raising it lets the layout try more cards but cannot
+create unlimited screen space. On smaller/mobile windows, content can scroll.
+This adaptive card behavior does not change the geographic or switch topology
+layout; filter by site when those maps become crowded.

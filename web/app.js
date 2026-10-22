@@ -11,7 +11,6 @@ let config, data, view='connections', siteFilter='', dialogState=null, rotate=fa
 let refreshTimer, refreshPending=false, soundEnabled=false, audioContext, knownCritical=null, rotationBase, hiddenViews=new Set(), diagnosticBusy=false;
 const history=new Map();
 let motion=localStorage.getItem('noctv-motion')!=='off';
-const cardLimit = () => {if(innerWidth<1000)return config.display.max_cards;const columns=view==='servers'?2:innerWidth<1500?4:5;const height=view==='servers'?430:['wireless','services','containers'].includes(view)?300:view==='printers'?200:180;return Math.min(config.display.max_cards,columns*Math.max(1,Math.floor($('#stage').clientHeight/height)));};
 const selected = () => data.devices.filter(d => !siteFilter || d.site===siteFilter);
 const state = (value='unknown') => `<span class="state" data-state="${esc(value)}">${esc(value.toUpperCase())}</span>`;
 const rate = value => !numeric(value) ? '—' : value>=1e6 ? num(value/1e6,' Mbps') : num(value/1e3,' kbps');
@@ -36,7 +35,7 @@ function plot(d,key='latency_ms'){
  return `<div class="response-chart"><svg viewBox="0 0 300 50" preserveAspectRatio="none" role="img" aria-label="Collected ${esc(key.replaceAll('_',' '))} history"><path class="chart-axis" d="M2 46H298"/><path class="chart-line" d="${path}"/></svg><span>${Math.round(span/1000)}s observed</span><span>0–${num(max)} ${key==='latency_ms'?'ms':'%'}</span></div>`;
 }
 function card(d){
- const m=d.metrics||{},kind=d.type,visual=d.state==='up'&&kind==='printer'&&numeric(m.toner_percent)&&m.toner_percent<20?'attention':d.state;
+ const m=d.metrics||{},kind=d.type,visual=equipmentState(d);
  const instruments=kind==='printer'?`<div class="supplies">${meter('Black / toner',m.toner_percent,'ink-black')}${meter('Cyan',m.toner_cyan_percent,'ink-cyan')}${meter('Magenta',m.toner_magenta_percent,'ink-magenta')}${meter('Yellow',m.toner_yellow_percent,'ink-yellow')}</div>`:kind==='wireless'?`<div class="resources">${meter('CPU',m.cpu_percent)}${meter('Memory',m.memory_percent)}</div>`:kind==='switch'?miniPorts(d):'';
  return `<article class="device-card ${esc(kind)}-card" data-state="${esc(visual)}">${webLink(d)}<span class="card-state">${state(visual)}</span><button class="card-open" data-action="device" data-id="${esc(d.id)}"><span class="card-top">${brandIcon(d)}<span><h3>${esc(d.name)}</h3><span class="meta">${esc(d.ip||'Address not reported')}</span></span></span></button><p class="meta">${esc(siteName(d.site))} · ${esc(d.model||kind)}</p>${instruments}${readings(d)}${kind==='printer'?'':plot(d)}</article>`;
 }
@@ -47,9 +46,9 @@ function capacity(label,value,total,unit,cls){
 }
 function capacityStrip(m){return `<div class="server-capacity">${capacity('CPU',m.cpu_percent,m.cpu_capacity_mhz,'MHz','cpu')}${capacity('Memory',m.memory_percent,m.memory_total_bytes,'bytes','memory')}${capacity('Storage',m.disk_percent,m.disk_total_bytes,'bytes','storage')}</div>`;}
 function serverCard(d){
- const m=d.metrics||{},h=d.hardware||{},storage=Array.isArray(d.storage)?d.storage:[],health=d.state==='up'&&(m.disk_percent>=85||m.memory_percent>=90)?'attention':d.state;
+ const m=d.metrics||{},h=d.hardware||{},storage=Array.isArray(d.storage)?d.storage:[],health=equipmentState(d);
  const field=(label,value)=>`<div><small>${label}</small><strong>${value}</strong></div>`;
- return `<article class="device-card server-card" data-state="${esc(health)}"><header class="server-head">${webLink(d)}<button class="card-open" data-action="device" data-id="${esc(d.id)}"><h3>${esc(d.name)} · ${esc(d.model||'Server')}</h3><span class="meta">${esc(d.ip||'Address not reported')} · ${esc(siteName(d.site))}</span></button>${state(health)}</header>${capacityStrip(m)}<div class="hardware-readings">${field('Host',state(d.state))}${field('Management',state(d.management_state||'unknown'))}${field('Hardware',state(h.state||'unknown'))}${field('Power',num(m.power_watts,' W'))}${field('Processor',esc(h.processor||'Not reported'))}${field('Temperature',num(m.temperature_celsius,' °C'))}${field('Fans',`${num(h.fan_count)} ${state(h.fan_state||'unknown')}`)}${field('Power supplies',`${num(h.power_supply_count)} ${state(h.power_supply_state||'unknown')}`)}</div><div class="storage-panel"><div class="storage-heading"><h3>RAID and physical drives</h3><span>${num(h.drive_count)} drives ${state(h.drive_state||'unknown')}</span></div><div class="storage-heading"><h3>Datastores</h3><span>${storage.length||'Not reported'}</span></div><div class="datastores">${storage.map(x=>`<div class="datastore ${x.used_percent>=85?'storage-warning':''}">${meter(x.name,x.used_percent)}<div class="capacity-details"><span>Free ${numeric(x.capacity_bytes)&&numeric(x.used_percent)?bytes(x.capacity_bytes*(1-x.used_percent/100)):'—'}</span><span>Total ${bytes(x.capacity_bytes)}</span></div></div>`).join('')||'<p class="note">No storage inventory reported by this source</p>'}</div></div></article>`;
+ return `<article class="device-card server-card" data-state="${esc(health)}"><header class="server-head">${webLink(d)}<button class="card-open" data-action="device" data-id="${esc(d.id)}"><h3>${esc(d.name)} · ${esc(d.model||'Server')}</h3><span class="meta">${esc(d.ip||'Address not reported')} · ${esc(siteName(d.site))}</span></button>${state(health)}</header>${capacityStrip(m)}<div class="storage-brief">${storage.length?`${storage.length} datastores · ${storage.filter(x=>x.used_percent>=85).length} high usage`:'Storage not reported'} · Hardware ${state(h.state||'unknown')}</div><div class="hardware-readings">${field('Host',state(d.state))}${field('Management',state(d.management_state||'unknown'))}${field('Hardware',state(h.state||'unknown'))}${field('Power',num(m.power_watts,' W'))}${field('Processor',esc(h.processor||'Not reported'))}${field('Temperature',num(m.temperature_celsius,' °C'))}${field('Fans',`${num(h.fan_count)} ${state(h.fan_state||'unknown')}`)}${field('Power supplies',`${num(h.power_supply_count)} ${state(h.power_supply_state||'unknown')}`)}</div><div class="storage-panel"><div class="storage-heading"><h3>RAID and physical drives</h3><span>${num(h.drive_count)} drives ${state(h.drive_state||'unknown')}</span></div><div class="storage-heading"><h3>Datastores</h3><span>${storage.length||'Not reported'}</span></div><div class="datastores">${storage.map(x=>`<div class="datastore ${x.used_percent>=85?'storage-warning':''}">${meter(x.name,x.used_percent)}<div class="capacity-details"><span>Free ${numeric(x.capacity_bytes)&&numeric(x.used_percent)?bytes(x.capacity_bytes*(1-x.used_percent/100)):'—'}</span><span>Total ${bytes(x.capacity_bytes)}</span></div></div>`).join('')||'<p class="note">No storage inventory reported by this source</p>'}</div></div></article>`;
 }
 function serverHistory(ds){
  const series=[['cpu_percent','CPU','cpu'],['memory_percent','Memory','memory'],['disk_percent','Storage','storage']];
@@ -134,17 +133,19 @@ function monitorCard(d){
  const facts=container?[['Runtime',d.runtime_state||'unknown'],['Healthcheck',d.health_state||'unknown'],['Restarts',num(m.restart_count)]]:[['Response',num(m.latency_ms,' ms')],['HTTP status',num(m.http_status_code)],['TLS validity',num(m.certificate_days,' days')]];
  return `<article class="device-card monitor-card" data-state="${esc(d.state)}">${webLink(d)}<span class="card-state">${state(d.state)}</span><button class="card-open" data-action="device" data-id="${esc(d.id)}"><span class="card-top">${brandIcon(d)}<span><h3>${esc(d.name)}</h3><span class="meta">${esc(d.category||d.model)}</span></span></span></button><p class="meta">${esc(siteName(d.site))}${d.ip?' · '+esc(d.ip):''}</p><div class="monitor-facts">${facts.filter(([label])=>container||label==='Response'||label==='HTTP status'&&numeric(m.http_status_code)||label==='TLS validity'&&numeric(m.certificate_days)).map(([label,value])=>`<div><small>${label}</small><strong>${esc(value)}</strong></div>`).join('')}</div>${container?`<div class="resources">${meter('Host CPU share',m.cpu_percent)}${meter('Memory',m.memory_percent)}</div>`:plot(d)}<p class="monitor-reason">${esc(d.stale?'Telemetry unavailable':(d.services||[]).map(x=>x.name).join(' · ')||(container?'Runtime is not an application availability check.':'Status reported by monitoring source.'))}</p><small class="monitor-observed">Observed ${esc(age(d.observed_at))} ago</small></article>`;
 }
+const equipmentKinds={servers:['server'],printers:['printer'],wireless:['wireless'],devices:['device','router','firewall'],services:['service'],containers:['container']};
+function equipmentState(d){return d.state==='up'&&(d.type==='server'&&(d.metrics?.disk_percent>=85||d.metrics?.memory_percent>=90||d.storage?.some(x=>x.used_percent>=85))||d.type==='printer'&&numeric(d.metrics?.toner_percent)&&d.metrics.toner_percent<20)?'attention':d.state;}
+function equipmentRows(){return selected().filter(d=>equipmentKinds[view]?.includes(d.type)).sort((a,b)=>severity[equipmentState(a)]-severity[equipmentState(b)]||a.type.localeCompare(b.type)||a.name.localeCompare(b.name));}
 function devicesGrid(){
- const kinds={servers:['server'],printers:['printer'],wireless:['wireless'],devices:['device','router','firewall'],services:['service'],containers:['container']};
- const rows=selected().filter(d=>kinds[view].includes(d.type)).sort((a,b)=>severity[a.state]-severity[b.state]||a.type.localeCompare(b.type)||a.name.localeCompare(b.name)),shown=rows.slice(0,cardLimit());
+ const rows=equipmentRows(),shown=rows.slice(0,config.display.max_cards);
  $('#coverage').textContent=`${shown.length}/${rows.length} devices · incidents first · missing measurements are not inferred`;
  if(!rows.length)return `<div class="empty">No ${esc(titles[view].toLowerCase())} reported in this scope. Configure device categories in your connector.</div>`;
- if(view==='servers')return `<div class="servers-grid">${shown.map(serverCard).join('')}</div>${serverHistory(rows)}`;
+ if(view==='servers')return `<div class="adaptive-equipment"><div class="servers-grid">${shown.map(serverCard).join('')}</div></div>${serverHistory(rows)}`;
  if(view==='devices'){
   const groups=new Map();for(const d of shown){const name=d.category||({firewall:'Firewalls',router:'Routers'}[d.type])||'Other devices';if(!groups.has(name))groups.set(name,[]);groups.get(name).push(d);}
-  return `<div class="device-categories">${[...groups].map(([name,ds])=>`<section class="equipment-category"><div class="category-head"><h2>${esc(name)}</h2><span>${ds.length} devices</span></div><div class="category-grid">${ds.map(card).join('')}</div></section>`).join('')}</div>`;
+  return `<div class="adaptive-equipment"><div class="device-categories">${[...groups].map(([name,ds])=>`<section class="equipment-category"><div class="category-head"><h2>${esc(name)}</h2><span>${ds.length} devices</span></div><div class="category-grid">${ds.map(card).join('')}</div></section>`).join('')}</div></div>`;
  }
- return `<div class="grid equipment-grid ${view}-grid">${shown.map(d=>['service','container'].includes(d.type)?monitorCard(d):card(d)).join('')}</div>`;
+ return `<div class="adaptive-equipment"><div class="grid equipment-grid ${view}-grid">${shown.map(d=>['service','container'].includes(d.type)?monitorCard(d):card(d)).join('')}</div></div>`;
 }
 function summaryStats(){
  const kinds={connections:['firewall','router'],switches:['switch'],servers:['server'],printers:['printer'],wireless:['wireless'],devices:['device','router','firewall'],services:['service'],containers:['container']};
@@ -167,12 +168,33 @@ function summaryStats(){
 function statHTML([v,label,hint,cls]){return `<div class="stat"><strong class="${cls}">${v}</strong><span>${label}</span><small>${hint}</small></div>`;}
 
 function fitEquipment(){
- if(innerWidth<1000)return;
- const stage=$('#stage'),bottom=stage.getBoundingClientRect().bottom;
- for(const card of stage.querySelectorAll('.device-card'))if(card.getBoundingClientRect().bottom>bottom+1)card.remove();
- for(const group of stage.querySelectorAll('.equipment-category'))if(!group.querySelector('.device-card'))group.remove();
- if(['servers','printers','wireless','devices','services','containers'].includes(view))$('#coverage').textContent=$('#coverage').textContent.replace(/^\d+\//,stage.querySelectorAll('.device-card').length+'/');
+ const stage=$('#stage'),layout=stage.querySelector('.adaptive-equipment');if(!layout)return;
+ const rows=equipmentRows(),grid=layout.firstElementChild,summary=document.createElement('button');
+ summary.className='equipment-overflow';summary.dataset.action='inventory';layout.append(summary);
+ const byId=new Map([...grid.querySelectorAll('.device-card')].map(c=>[c.querySelector('[data-action="device"]').dataset.id,c])),cards=rows.map(d=>byId.get(d.id)).filter(Boolean),desktop=innerWidth>=1000;
+ const updateSummary=()=>{const visible=new Set(cards.map(c=>c.querySelector('[data-action="device"]').dataset.id)),hidden=rows.filter(d=>!visible.has(d.id)),counts=Object.entries(severity).map(([st])=>{const n=hidden.filter(d=>equipmentState(d)===st).length;return n?`${n} ${st.toUpperCase()}`:'';}).filter(Boolean);
+  for(const group of grid.querySelectorAll('.equipment-category'))group.querySelector('.category-head span').textContent=`${group.querySelectorAll('.device-card').length} devices`;
+  summary.hidden=!hidden.length;summary.textContent=`${hidden.length} more devices · ${counts.join(' · ')} · Open inventory`;
+  summary.dataset.state=hidden.some(d=>equipmentState(d)==='down')?'down':hidden.some(d=>['attention','unknown'].includes(equipmentState(d)))?'attention':'up';
+  $('#coverage').textContent=`${cards.length}/${rows.length} devices · incidents first${hidden.length?' · remaining devices summarized above':''}`;
+ };
+ updateSummary();
+ if(!desktop)return;
+ // Measure the actual content; long names, category headers and zoom affect fit.
+ const fits=()=>{const bounds=layout.getBoundingClientRect();return bounds.bottom<=stage.getBoundingClientRect().bottom+1&&grid.scrollWidth<=grid.clientWidth+1&&layout.scrollHeight<=layout.clientHeight+1&&[...cards,...(summary.hidden?[]:[summary])].every(c=>{const r=c.getBoundingClientRect();return r.bottom<=bounds.bottom+1&&r.right<=bounds.right+1;});};
+ const arrange=()=>{
+  for(const density of ['normal','compact','dense']){
+   layout.dataset.density=density;
+   const min=view==='servers'?{normal:650,compact:380,dense:300}[density]:{normal:340,compact:280,dense:240}[density];
+   const count=view==='devices'?grid.children.length:cards.length,max=Math.max(1,Math.min(count,Math.floor((layout.clientWidth+12)/(min+12))));
+   for(let columns=max;columns>=1;columns--){layout.style.setProperty('--equipment-columns',columns);if(fits())return true;}
+  }
+  return false;
+ };
+ while(!arrange()&&cards.length){cards.pop().remove();for(const group of grid.querySelectorAll('.equipment-category'))if(!group.querySelector('.device-card'))group.remove();updateSummary();}
+ updateSummary();
 }
+
 function render(){
  if(!data||!config)return;
  const focus=document.activeElement?.closest('[data-action]'),key=focus?{action:focus.dataset.action,id:focus.dataset.id,port:focus.dataset.port}:null;
@@ -205,12 +227,13 @@ function siteDetails(id){
 function renderDialog(){
  const s=dialogState;if(!s)return;
  if(s.type==='alerts'){$('#dialog-title').textContent='Current alerts';$('#dialog-eyebrow').textContent='Source state and operational events';$('#dialog-body').innerHTML=`<div class="alert-list">${data.alerts.map(a=>`<article data-severity="${esc(a.severity)}">${esc(a.text)}</article>`).join('')||'<p class="empty">No active alerts.</p>'}</div>`;return;}
+ if(s.type==='inventory'){$('#dialog-title').textContent=titles[view]+' · Full inventory';$('#dialog-eyebrow').textContent='All devices in this scope · incidents first';$('#dialog-body').innerHTML=`<div class="grid">${equipmentRows().map(d=>['service','container'].includes(d.type)?monitorCard(d):d.type==='server'?serverCard(d):card(d)).join('')}</div>`;return;}
  if(s.type==='site'){$('#dialog-title').textContent=siteName(s.id);$('#dialog-eyebrow').textContent='Site inventory · live updates';$('#dialog-body').innerHTML=siteDetails(s.id);return;}
  const d=data.devices.find(d=>d.id===s.id);if(!d){$('#dialog-body').innerHTML='<p class="empty">This device is no longer in the current inventory.</p>';return;}
  $('#dialog-title').textContent=d.name;$('#dialog-eyebrow').textContent=[siteName(d.site),d.model,d.ip].filter(Boolean).join(' · ');
  const ports=d.ports||[];if(!s.port&&ports.length)s.port=ports[0].id;
  const metrics=Object.entries(d.metrics||{}).filter(([,v])=>numeric(v));
- $('#dialog-body').innerHTML=`<div class="details-summary">${state(d.state)}<span>Source ${esc(d.source)}</span>${d.management_state?`<span>Management API: ${esc(d.management_state)}</span>`:''}<span>Observed ${esc(age(d.observed_at))} ago</span>${d.stale?'<span class="warn">Telemetry stale; state is unknown</span>':''}</div>${metrics.length?`<div class="detail-fields">${metrics.map(([k,v])=>`<div><span>${esc(k.replaceAll('_',' '))}</span>${num(v)}</div>`).join('')}</div>`:''}${d.type==='container'?`<div class="detail-fields"><div><span>Runtime</span>${esc(d.runtime_state||'unknown')}</div><div><span>Healthcheck</span>${esc(d.health_state||'unknown')}</div></div>`:''}${ports.length?`<section class="port-panel"><div class="port-panel-header"><strong>${esc(d.model||'Interfaces')}</strong><span>${ports.filter(p=>p.state==='up').length} UP / ${ports.length} interfaces</span></div><div class="ports">${ports.map(p=>`<button class="port" data-action="port" data-id="${esc(d.id)}" data-port="${esc(p.id)}" data-state="${esc(p.state)}" aria-pressed="${s.port===p.id}" aria-label="${esc(p.name)} ${esc(p.state)}">${esc(p.name)}</button>`).join('')}</div><p class="note">Logical interface diagram · positions are not a manufacturer faceplate.</p></section><section class="port-detail">${portDetail(d,ports.find(p=>p.id===s.port))}</section>`:['service','container'].includes(d.type)?'':'<p class="empty">This source has not reported interface data for this device.</p>'}${d.services?.length?`<h3>Reported services</h3><div class="alert-list">${d.services.map(x=>`<article>${esc(x.name)} · ${esc(x.state)}</article>`).join('')}</div>`:''}`;
+ $('#dialog-body').innerHTML=`<div class="details-summary">${state(d.state)}<span>Source ${esc(d.source)}</span>${d.management_state?`<span>Management API: ${esc(d.management_state)}</span>`:''}<span>Observed ${esc(age(d.observed_at))} ago</span>${d.stale?'<span class="warn">Telemetry stale; state is unknown</span>':''}</div>${d.type==='server'?serverCard(d):''}${metrics.length?`<div class="detail-fields">${metrics.map(([k,v])=>`<div><span>${esc(k.replaceAll('_',' '))}</span>${num(v)}</div>`).join('')}</div>`:''}${d.type==='container'?`<div class="detail-fields"><div><span>Runtime</span>${esc(d.runtime_state||'unknown')}</div><div><span>Healthcheck</span>${esc(d.health_state||'unknown')}</div></div>`:''}${ports.length?`<section class="port-panel"><div class="port-panel-header"><strong>${esc(d.model||'Interfaces')}</strong><span>${ports.filter(p=>p.state==='up').length} UP / ${ports.length} interfaces</span></div><div class="ports">${ports.map(p=>`<button class="port" data-action="port" data-id="${esc(d.id)}" data-port="${esc(p.id)}" data-state="${esc(p.state)}" aria-pressed="${s.port===p.id}" aria-label="${esc(p.name)} ${esc(p.state)}">${esc(p.name)}</button>`).join('')}</div><p class="note">Logical interface diagram · positions are not a manufacturer faceplate.</p></section><section class="port-detail">${portDetail(d,ports.find(p=>p.id===s.port))}</section>`:['service','container'].includes(d.type)?'':'<p class="empty">This source has not reported interface data for this device.</p>'}${d.services?.length?`<h3>Reported services</h3><div class="alert-list">${d.services.map(x=>`<article>${esc(x.name)} · ${esc(x.state)}</article>`).join('')}</div>`:''}`;
 }
 function openDialog(type,id,port){dialogState={type,id,port};renderDialog();if(!$('#details').open)$('#details').showModal();}
 function viewDuration(){return Math.round(rotationBase*(view==='connections'?Math.max(1,config.display.connections_seconds/config.display.rotate_seconds):1));}
@@ -261,7 +284,7 @@ async function boot(){
  try{const response=await fetch('/api/v1/config');if(!response.ok)throw Error('config');config=await response.json();rotationBase=Number(localStorage.getItem('noctv-rotate-seconds'))||config.display.rotate_seconds;rotationBase=Math.max(5,Math.min(600,Math.round(rotationBase)));$('#rotate-seconds').value=rotationBase;rotate=localStorage.getItem('noctv-rotate')==='on';$('#tv-profile').value=['1080p','4k'].includes(localStorage.getItem('noctv-tv-profile'))?localStorage.getItem('noctv-tv-profile'):'auto';applyDisplay();$('#mode').textContent=config.mode==='demo'?'DEMO · SIMULATED':'LIVE';$('#mode').classList.toggle('demo',config.mode==='demo');try{const saved=JSON.parse(localStorage.getItem('noctv-hidden-views')||'[]');hiddenViews=new Set(Array.isArray(saved)?saved.filter(v=>config.display.views.includes(v)):[]);}catch{hiddenViews.clear();}if(!visibleViews().length)hiddenViews.clear();renderNavigation();$('#site-filter').innerHTML='<option value="">All sites</option>'+config.sites.map(s=>`<option value="${esc(s.id)}">${esc(s.name)}</option>`).join('')+'<option value="unassigned">Unassigned</option>';navigate(location.hash.slice(1));applyMotion();await refresh();}
  catch{$('#error').hidden=false;$('#error').textContent='Configuration unavailable. Retrying…';setTimeout(boot,5000);}
 }
-document.addEventListener('click',event=>{const button=event.target.closest('[data-action]');if(!button||!data)return;const {action,id,port}=button.dataset;if(action==='port'){dialogState.port=port;renderDialog();[...$('#dialog-body').querySelectorAll('[data-action="port"]')].find(b=>b.dataset.port===port)?.focus({preventScroll:true});}else if(['site','device','alerts'].includes(action))openDialog(action,id,port);});
+document.addEventListener('click',event=>{const button=event.target.closest('[data-action]');if(!button||!data)return;const {action,id,port}=button.dataset;if(action==='port'){dialogState.port=port;renderDialog();[...$('#dialog-body').querySelectorAll('[data-action="port"]')].find(b=>b.dataset.port===port)?.focus({preventScroll:true});}else if(['site','device','alerts','inventory'].includes(action))openDialog(action,id,port);});
 $('#details').addEventListener('close',()=>{dialogState=null;if(config)resetRotation();});$('#close-dialog').addEventListener('click',()=>$('#details').close());
 $('#site-filter').addEventListener('change',event=>{siteFilter=event.target.value;render();});
 $('#motion').addEventListener('click',()=>{motion=!motion;localStorage.setItem('noctv-motion',motion?'on':'off');applyMotion();});
@@ -288,6 +311,7 @@ $('#diagnostic-form').addEventListener('submit',async event=>{event.preventDefau
 $('#ticker-pause').addEventListener('click',()=>{const paused=$('.ticker').classList.toggle('paused');$('#ticker-pause').setAttribute('aria-pressed',String(paused));$('#ticker-pause').setAttribute('aria-label',paused?'Resume alert scrolling':'Pause alert scrolling');});
 $('#fullscreen').addEventListener('click',async()=>{try{if(document.fullscreenElement)await document.exitFullscreen();else await document.documentElement.requestFullscreen();}catch{$('#error').hidden=false;$('#error').textContent='Fullscreen was not allowed by this browser.';}});
 window.addEventListener('resize',()=>{applyDisplay();if(data)render();});
+document.fonts.addEventListener('loadingdone',()=>{if(data)render();});
 window.addEventListener('hashchange',()=>{if(config)navigate(location.hash.slice(1));});
 document.addEventListener('visibilitychange',()=>document.body.classList.toggle('page-hidden',document.hidden));
 setInterval(()=>{if(!config)return;updateFreshness();if(rotate&&!document.hidden&&!$('#details').open&&!$('#tools-dialog').open&&Date.now()>=rotateDeadline){const available=visibleViews(),i=available.indexOf(view);location.hash=available[(i+1)%available.length];resetRotation();}},1000);

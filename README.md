@@ -183,8 +183,9 @@ frontend bundler, CDN, paid API or telemetry account is required.
   proven device-count limit. Scale must be measured against your sources.
 - Generic interface diagrams, not manufacturer faceplates or a physical cabling
   guarantee. Discovered neighbors are shown only when the source reports them.
-- TV views prioritize incidents and show coverage counts when inventory exceeds
-  display capacity. They do not pretend every device fits on one screen.
+- Equipment cards adapt columns and detail to the available screen area. TV views
+  prioritize incidents and summarize remaining inventory by state when readable
+  cards cannot all fit. Full inventory stays accessible from that summary.
 - No automatic cross-source identity merge. Avoid collecting the same appliance
   twice unless separate cards are intentional.
 - The interface is currently in English; Portuguese documentation is included.
