@@ -1,0 +1,12 @@
+.hyperframes/
+.media/
+assets/raw/
+assets/*.mp4
+assets/*.png
+assets/recording.json
+renders/
+node_modules/
+assets/click.mp3
+
+.thumbnails/
+.waveform-cache/

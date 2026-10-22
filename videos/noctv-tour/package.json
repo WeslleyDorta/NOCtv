@@ -1,0 +1,12 @@
+{
+  "name": "noctv-tour",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npx --yes hyperframes@0.8.185 preview",
+    "check": "npx --yes hyperframes@0.8.185 check",
+    "render": "npx --yes hyperframes@0.8.185 render",
+    "publish": "npx --yes hyperframes@0.8.185 publish",
+    "render:rtx": "env __NV_PRIME_RENDER_OFFLOAD=1 __GLX_VENDOR_LIBRARY_NAME=nvidia __VK_LAYER_NV_optimus=NVIDIA_only VK_LOADER_DRIVERS_SELECT=*nvidia* npx --yes hyperframes@0.8.185 render --gpu --browser-gpu"
+  }
+}

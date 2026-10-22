@@ -6,11 +6,18 @@ See site connectivity, follow switch links and inspect ports from one TV dashboa
 NOCtv brings LibreNMS, Zabbix and Prometheus telemetry together with service checks
 and Docker health, using your own infrastructure.
 
+Use it on a TV for monitoring from across the room, with automatic screen rotation
+and a scrolling alert ticker, or at your desk to open sites, devices and port
+details. Choose the TV profile and visible screens to suit your display and viewing
+distance.
+
 **Self-hosted · Nine configurable screens · Synthetic demo · MIT source code**
 
 [Run the demo](#try-it) · [Screen tour](docs/tour.md) · [Connect your tools](#connect-your-tools) · [Português](README.pt-BR.md)
 
-![NOCtv demo: site connections](docs/images/connections.png)
+[![Watch NOCtv: animated map and scrolling alerts](docs/video/preview.gif)](docs/video/README.md)
+
+**Watch the 75-second tour:** [English](https://github.com/WeslleyDorta/NOCtv/raw/refs/heads/main/docs/video/noctv-tour-en.mp4) · [Português](https://github.com/WeslleyDorta/NOCtv/raw/refs/heads/main/docs/video/noctv-tour-pt-BR.mp4) · [Chapters and interactive player](docs/video/README.md)
 
 > **0.1 community preview.** Screenshots and the default installation use synthetic
 > data. This release is fixture-tested, not certified against every vendor or

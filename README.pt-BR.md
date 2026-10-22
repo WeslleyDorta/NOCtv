@@ -6,9 +6,16 @@ Painel de monitoramento de rede para TVs e operações de NOC. Reúne dados do
 LibreNMS, Zabbix, Prometheus, NetBox e APIs de firewalls em telas de conexões, switches, portas,
 servidores, impressoras, Wi-Fi, dispositivos, Serviços e Containers.
 
+Use em uma TV para acompanhar o ambiente de longe, com rodízio automático de
+telas e faixa de alertas, ou no computador, de perto, para abrir unidades,
+equipamentos e detalhes das portas. Ajuste o perfil da TV e as telas visíveis
+conforme o tamanho da tela e a distância de leitura.
+
 [Executar demonstração](#executar-a-demonstração) · [Conhecer as telas](docs/tour.md) · [Integrações](docs/integrations.md) · [English](README.md)
 
-![Demonstração com dados fictícios](docs/images/connections.png)
+[![NOCtv em movimento: mapa e faixa de alertas](docs/video/preview.gif)](docs/video/README.md)
+
+**Tour de 75 segundos:** [Português](https://github.com/WeslleyDorta/NOCtv/raw/refs/heads/main/docs/video/noctv-tour-pt-BR.mp4) · [English](https://github.com/WeslleyDorta/NOCtv/raw/refs/heads/main/docs/video/noctv-tour-en.mp4) · [Capítulos e player interativo](docs/video/README.md)
 
 ## Executar a demonstração
 

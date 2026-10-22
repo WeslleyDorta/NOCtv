@@ -1,0 +1,93 @@
+[
+  {
+    "id": "connections",
+    "start": 0,
+    "duration": 8,
+    "en": "Sua rede, vista de longe",
+    "pt": "Sua rede, vista de longe"
+  },
+  {
+    "id": "site",
+    "start": 8,
+    "duration": 6,
+    "en": "Abra a unidade. Veja o contexto.",
+    "pt": "Abra a unidade. Veja o contexto."
+  },
+  {
+    "id": "switches",
+    "start": 14,
+    "duration": 6,
+    "en": "Siga o caminho da rede",
+    "pt": "Siga o caminho da rede"
+  },
+  {
+    "id": "port",
+    "start": 20,
+    "duration": 10,
+    "en": "Inspecione a porta. Acompanhe a recuperação.",
+    "pt": "Inspecione a porta. Acompanhe a recuperação."
+  },
+  {
+    "id": "ports",
+    "start": 30,
+    "duration": 4,
+    "en": "Foco nas portas que exigem ação",
+    "pt": "Foco nas portas que exigem ação"
+  },
+  {
+    "id": "servers",
+    "start": 34,
+    "duration": 4,
+    "en": "Acompanhe capacidade e hardware",
+    "pt": "Acompanhe capacidade e hardware"
+  },
+  {
+    "id": "printers",
+    "start": 38,
+    "duration": 4,
+    "en": "Veja os suprimentos antes de acabar",
+    "pt": "Veja os suprimentos antes de acabar"
+  },
+  {
+    "id": "wireless",
+    "start": 42,
+    "duration": 4,
+    "en": "Acompanhe a rede sem fio",
+    "pt": "Acompanhe a rede sem fio"
+  },
+  {
+    "id": "devices",
+    "start": 46,
+    "duration": 4,
+    "en": "Organize equipamentos por categoria",
+    "pt": "Organize equipamentos por categoria"
+  },
+  {
+    "id": "services",
+    "start": 50,
+    "duration": 6,
+    "en": "Uma falha dá lugar à recuperação",
+    "pt": "Uma falha dá lugar à recuperação"
+  },
+  {
+    "id": "containers",
+    "start": 56,
+    "duration": 5,
+    "en": "Acompanhe também os containers",
+    "pt": "Acompanhe também os containers"
+  },
+  {
+    "id": "tools",
+    "start": 61,
+    "duration": 6,
+    "en": "Escolha o que aparece na TV",
+    "pt": "Escolha o que aparece na TV"
+  },
+  {
+    "id": "start",
+    "start": 67,
+    "duration": 8,
+    "en": "Try NOCtv",
+    "pt": "Experimente o NOCtv"
+  }
+]
