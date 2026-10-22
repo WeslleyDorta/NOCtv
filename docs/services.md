@@ -114,9 +114,10 @@ not full Kuma parity: push heartbeats, notification providers, persistent uptime
 history, MQTT and database-specific checks are not implemented. Charts show
 samples collected during the current browser session.
 
-Verification uses synthetic Docker fixtures and local HTTP/TCP test endpoints.
-A live Docker Engine and production HTTPS targets still need installation-level
-validation. Demo mode makes no outbound checks, even with connector definitions.
+Verification includes synthetic fixtures and an isolated Linux Docker lab with
+Engine 29.1.3 / API 1.45, a scoped mTLS read proxy, native checks, TLS validation and
+failure/recovery. See [the validation record](release-readiness.md) for exact scope.
+Each deployment and production target still needs installation-level validation. Demo mode makes no outbound checks, even with connector definitions.
 
 References: [Docker Engine API](https://docs.docker.com/reference/api/engine/version/v1.45/),
 [Docker daemon access](https://docs.docker.com/engine/security/protect-access/),

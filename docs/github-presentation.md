@@ -1,7 +1,8 @@
 # Repository presentation
 
-This file contains proposed repository metadata and publication steps. It does
-not change GitHub settings or indicate that a release has been published.
+This file contains proposed repository metadata and release steps. Community code
+has been pushed; the metadata below does not apply itself, and no release tag is
+implied. See [validation status](release-readiness.md) for test evidence.
 
 ## About description
 
